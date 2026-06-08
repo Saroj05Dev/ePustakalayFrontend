@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import Sidebar from '../components/sidebar';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 const Layout = ({ children, activeNav, setActiveNav }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -14,6 +16,8 @@ const Layout = ({ children, activeNav, setActiveNav }) => {
       {/* Top Header - fixed full-width */}
       <Header toggleSidebar={toggleSidebar} />
 
+      
+
       <div className="flex flex-1 relative mt-[70px]">
         {/* Left Sidebar - sits below Header */}
         <Sidebar
@@ -24,12 +28,18 @@ const Layout = ({ children, activeNav, setActiveNav }) => {
         />
 
         {/* Main Content Area */}
+
+        
         <main className="flex-1 flex flex-col min-w-0 transition-all duration-300 lg:pl-[260px]">
           <div className="p-5 md:p-8 w-full transition-all duration-300">
             {children}
           </div>
         </main>
+        
+       
       </div>
+
+      
     </div>
   );
 };
