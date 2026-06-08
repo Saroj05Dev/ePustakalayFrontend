@@ -9,12 +9,16 @@ import ManageBooks from "./pages/admin/ManageBook";
 import Users from "./pages/admin/Users";
 import Orders from "./pages/admin/Orders";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Layout from "./layout/Layout";
+import PublicLayout from "./layout/publicLayout";
+import BooksPage from "./pages/BooksPage";
 
 function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />
+        <Route path="/books" element={<BooksPage />}/>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
 
