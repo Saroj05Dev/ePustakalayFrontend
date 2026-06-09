@@ -3,6 +3,8 @@ import React,{useEffect} from "react";
 import { useDispatch,useSelector } from "react-redux";
 import {getAllBooks} from "../redux/slices/bookSlice";
 
+
+
 const colors = {
   primary: "#002629",
   primaryContainer: "#083d41",
@@ -22,17 +24,6 @@ const colors = {
   inversePrimary: "#a0cfd3",
 };
 
-const BooksPage = ()=>{
-    const dispatch = useDispatch();
-
-    const books = useSelector(
-        (state) => state.book.booksData
-    );
-
-    useEffect(()=>{
-        dispatch(getAllBooks());
-    },[dispatch]);
-}
 
 const categories = ["Fiction", "Academic", "Programming", "History"];
 const languages = ["English", "Hindi", "Spanish"];
@@ -45,6 +36,8 @@ function BookCard({ book }) {
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };
+
+
 
   return (
     <div
@@ -125,6 +118,18 @@ function BookCard({ book }) {
 }
 
 export default function EPustakalay() {
+
+const dispatch = useDispatch();
+  
+  const books = useSelector(
+      (state) => state.book?.booksData || []
+  );
+
+  // 4. Trigger the data fetch when the component mounts
+  useEffect(() => {
+      dispatch(getAllBooks());
+  }, [dispatch]);
+
   const [checkedCategories, setCheckedCategories] = useState(["Fiction"]);
   const [activeLanguage, setActiveLanguage] = useState("English");
   const [priceRange, setPriceRange] = useState(500);
@@ -457,10 +462,11 @@ export default function EPustakalay() {
           {/* Books Grid */}
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {books.map((book) => (
-              <BookCard key={book.id} book={book} />
+              <BookCard key={book._id} book={book} />
             ))}
           </div> 
 
+            console.log(books);
           {/* Load More */}
           <div className="mt-16 flex justify-center">
             <button
