@@ -132,7 +132,7 @@ const FormSelect = ({ label, required, children, ...props }) => (
 
 const ManageBooks = ({ activeNav, setActiveNav }) => {
   const dispatch = useDispatch();
-  const reduxBooks = useSelector((state) => state.book.booksData) || [];
+  const reduxBooks = useSelector((state) => state.books.booksData) || [];
 
   const reduxCategories = useSelector((state) => state.category.categoriesData) || [];
   const reduxChapters = useSelector((state) => state.chapter.chaptersData) || [];

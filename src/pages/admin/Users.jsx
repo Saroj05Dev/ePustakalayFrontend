@@ -198,9 +198,9 @@ const Users = ({ activeNav, setActiveNav }) => {
 
     const toggleUserStatus = (id) => {
         const user = users.find(u => u._id === id);
-        if (!user) return;
+        if (!user || user.role === 'admin') return;
         const currentStatus = user.status || "Active";
-        const nextStatus = currentStatus === "Active" ? "Inactive" : currentStatus === "Inactive" ? "Suspended" : "Active";
+        const nextStatus = currentStatus === "Active" ? "Suspended" : "Active";
 
         dispatch(updateUser({ id, data: { status: nextStatus } }));
     };
@@ -374,19 +374,21 @@ const Users = ({ activeNav, setActiveNav }) => {
                                                 <td className="px-6 py-4.5 text-center">
                                                     <div className="flex items-center justify-center gap-2">
                                                         {/* Access Toggle Icon Button */}
-                                                        <button
-                                                            onClick={() => toggleUserStatus(user._id)}
-                                                            title={isActive ? "Access Granted — Click to Revoke" : "Access Revoked — Click to Grant"}
-                                                            className={`p-2 rounded-xl border transition-all cursor-pointer ${isActive
-                                                                ? "bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100/60"
-                                                                : "bg-red-50 text-red-500 border-red-100 hover:bg-red-100/60"
-                                                                }`}
-                                                        >
-                                                            {isActive
-                                                                ? <ShieldCheck className="w-3.5 h-3.5" />
-                                                                : <ShieldOff className="w-3.5 h-3.5" />
-                                                            }
-                                                        </button>
+                                                        {user.role !== 'admin' && (
+                                                            <button
+                                                                onClick={() => toggleUserStatus(user._id)}
+                                                                title={isActive ? "Access Granted — Click to Revoke" : "Access Revoked — Click to Grant"}
+                                                                className={`p-2 rounded-xl border transition-all cursor-pointer ${isActive
+                                                                    ? "bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100/60"
+                                                                    : "bg-red-50 text-red-500 border-red-100 hover:bg-red-100/60"
+                                                                    }`}
+                                                            >
+                                                                {isActive
+                                                                    ? <ShieldCheck className="w-3.5 h-3.5" />
+                                                                    : <ShieldOff className="w-3.5 h-3.5" />
+                                                                }
+                                                            </button>
+                                                        )}
 
                                                         {/* Delete User */}
                                                         <button

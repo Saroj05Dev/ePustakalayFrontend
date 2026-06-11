@@ -35,7 +35,7 @@ export const registerUser = createAsyncThunk(
 
 export const loginUser = createAsyncThunk(
     "/auth/login",
-    async (loginData) => {
+    async (loginData, thunkAPI) => {
         try {
             const response = axiosInstance.post("/users/login", loginData);
 
@@ -44,14 +44,14 @@ export const loginUser = createAsyncThunk(
                 success: (resolvedPromise) =>
                     resolvedPromise?.data?.message ||
                     "Login successful",
-                error: "Login failed",
+                error: (err) => err?.response?.data?.message || "Login failed",
             });
 
             const apiResponse = await response;
             return apiResponse;
         } catch (error) {
             console.log(error);
-            toast.error("Something went wrong");
+            return thunkAPI.rejectWithValue(error?.response?.data || error.message);
         }
     }
 );
@@ -188,10 +188,19 @@ const authSlice = createSlice({
                     action?.payload?.data?.data ||
                     action?.payload?.data;
 
-                state.isLoggedIn = true;
-                state.role = userData?.role || "";
-                state.data = userData || {};
-                state.isCheckingAuth = false;
+                if (userData && userData.status && userData.status !== "Active") {
+                    state.isLoggedIn = false;
+                    state.role = "";
+                    state.data = {};
+                    state.isCheckingAuth = false;
+                    localStorage.removeItem("token");
+                    toast.error("Your account is deactivated or suspended. Please contact the administrator.");
+                } else {
+                    state.isLoggedIn = true;
+                    state.role = userData?.role || "";
+                    state.data = userData || {};
+                    state.isCheckingAuth = false;
+                }
             })
 
             .addCase(getMe.rejected, (state) => {
