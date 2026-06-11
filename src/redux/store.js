@@ -8,7 +8,7 @@ import OrderSliceReducer from "./slices/orderSlice";
 export const store = configureStore({
     reducer: {
         auth: AuthSliceReducer,
-        category: CategorySliceReducer,
+        categories: CategorySliceReducer,
         books: BookSliceReducer,
         chapter: ChapterSliceReducer,
         order: OrderSliceReducer,

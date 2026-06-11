@@ -1,8 +1,16 @@
 import { Search, ShoppingCart, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 
 export default function Navbar() {
+
+  const linkStyles = ({ isActive }) => 
+    `transition-all duration-200 relative pb-1 ${
+      isActive 
+        ? "text-[#002629] after:w-full"
+        : "text-slate-500 hover:text-[#002629] after:w-0"
+    } after:content-[""] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-[#002629] after:transition-all after:duration-200`;
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-slate-50/80 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
       <nav className="flex justify-between items-center px-8 py-4 max-w-350 mx-auto h-16">
@@ -13,17 +21,15 @@ export default function Navbar() {
 
           <div className="hidden md:flex gap-8 items-center text-base">
             
-            <Link to="/" className="font-bold">
+          <NavLink to="/" className={linkStyles}>
                Home
-            </Link>
-            <Link to="/books" className="font-bold">
+            </NavLink>
+            <NavLink to="/books" className={linkStyles}>
               Books
-            </Link>
-            <Link to="" className="font-bold">
+            </NavLink>
+            <NavLink to="/wishlist" className={linkStyles}> {/* Added proper /wishlist path */}
               Wishlist
-            </Link>
-            {/* <a href="/books" className="text-gray-500">Books</a> */}
-            {/* <a className="text-gray-500">Wishlist</a> */}
+            </NavLink>
 
           </div>
         </div>
