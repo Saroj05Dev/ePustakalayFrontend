@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { loginUser } from "../../redux/slices/authSlice";
+import { loginUser, logout } from "../../redux/slices/authSlice";
+import toast from "react-hot-toast";
 
 const ROLE_ROUTES = {
   admin: "/admin",
@@ -17,21 +18,60 @@ export default function LoginPage() {
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({ email: "", password: "" });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Reset previous errors
+    const newErrors = { email: "", password: "" };
+    let isValid = true;
+
+    // Email validation
+    if (!form.email.trim()) {
+      newErrors.email = "Email is required";
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+      newErrors.email = "Please enter a valid email address";
+      isValid = false;
+    }
+
+    // Password validation
+    if (!form.password) {
+      newErrors.password = "Password is required";
+      isValid = false;
+    } else if (form.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    if (!isValid) return;
+
     setLoading(true);
 
     try {
       const result = await dispatch(loginUser({ email: form.email, password: form.password }));
 
-      const userData =
-        result?.payload?.data?.data ||
-        result?.payload?.data?.user;
-      const role = userData?.role || "user";
+      if (loginUser.fulfilled.match(result)) {
+        const payload = result?.payload?.data;
+        const userData =
+          payload?.data ||
+          payload?.user ||
+          payload?.userData ||
+          payload;
 
-      const destination = ROLE_ROUTES[role] ?? "/";
-      navigate(destination, { replace: true });
+        if (userData && userData.status && userData.status !== "Active") {
+          toast.error("Your account is deactivated or suspended. Please contact the administrator.");
+          dispatch(logout());
+          setLoading(false);
+          return;
+        }
+
+        const role = userData?.role || "user";
+        const destination = ROLE_ROUTES[role] ?? "/";
+        navigate(destination, { replace: true });
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -65,7 +105,7 @@ export default function LoginPage() {
             Sign in to continue to ePustakalay
           </p>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
 
             <div className="flex flex-col gap-1.5">
               <label htmlFor="login-email" className="text-xs font-medium text-gray-600 uppercase tracking-wide">
@@ -83,12 +123,20 @@ export default function LoginPage() {
                   type="email"
                   placeholder="name@example.com"
                   value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  onChange={(e) => {
+                    setForm({ ...form, email: e.target.value });
+                    if (errors.email) setErrors((prev) => ({ ...prev, email: "" }));
+                  }}
                   required
                   autoComplete="email"
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                  className={`w-full pl-9 pr-4 py-2.5 rounded-xl border ${errors.email ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 focus:ring-teal-500'} bg-gray-50 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition`}
                 />
               </div>
+              {errors.email && (
+                <span className="text-red-500 text-[11px] font-medium leading-none mt-1">
+                  {errors.email}
+                </span>
+              )}
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -112,10 +160,13 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  onChange={(e) => {
+                    setForm({ ...form, password: e.target.value });
+                    if (errors.password) setErrors((prev) => ({ ...prev, password: "" }));
+                  }}
                   required
                   autoComplete="current-password"
-                  className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                  className={`w-full pl-9 pr-10 py-2.5 rounded-xl border ${errors.password ? 'border-red-400 focus:ring-red-400' : 'border-gray-200 focus:ring-teal-500'} bg-gray-50 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition`}
                 />
                 <button
                   type="button"
@@ -137,6 +188,11 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
+              {errors.password && (
+                <span className="text-red-500 text-[11px] font-medium leading-none mt-1">
+                  {errors.password}
+                </span>
+              )}
             </div>
 
             <button

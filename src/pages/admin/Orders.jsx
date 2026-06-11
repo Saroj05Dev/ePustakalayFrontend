@@ -54,6 +54,24 @@ const getMethodIcon = (method) => {
   }
 };
 
+const getCustomerName = (o) =>
+  o?.user?.name ||
+  o?.userId?.name ||
+  o?.customer?.name ||
+  o?.customerName ||
+  o?.buyerName ||
+  o?.name ||
+  'N/A';
+
+const getCustomerEmail = (o) =>
+  o?.user?.email ||
+  o?.userId?.email ||
+  o?.customer?.email ||
+  o?.customerEmail ||
+  o?.buyerEmail ||
+  o?.email ||
+  '';
+
 const Orders = ({ activeNav, setActiveNav }) => {
   const dispatch = useDispatch();
   const { ordersData = [], loading } = useSelector((state) => state.order);
@@ -94,8 +112,8 @@ const Orders = ({ activeNav, setActiveNav }) => {
   const filteredOrders = useMemo(() => {
     return ordersData.filter((order) => {
       const orderId = order.orderId || order._id || '';
-      const name = order.user?.name || order.name || '';
-      const email = order.user?.email || order.email || '';
+      const name = getCustomerName(order);
+      const email = getCustomerEmail(order);
       const method = order.paymentMethod || order.method || '';
       const status = order.status || '';
 
@@ -131,8 +149,8 @@ const Orders = ({ activeNav, setActiveNav }) => {
     const headers = ['Order ID', 'Customer Name', 'Email', 'Date', 'Total Amount', 'Payment Method', 'Status'];
     const rows = filteredOrders.map(o => [
       o.orderId || o._id || '',
-      o.user?.name || o.name || '',
-      o.user?.email || o.email || '',
+      getCustomerName(o),
+      getCustomerEmail(o),
       o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-US') : o.date || '',
       o.totalAmount || o.amount || 0,
       o.paymentMethod || o.method || 'UPI',
@@ -325,10 +343,10 @@ const Orders = ({ activeNav, setActiveNav }) => {
                       <td className="px-6 py-4">
                         <div className="leading-tight">
                           <div className="font-bold text-slate-700">
-                            {order.user?.name || order.name || 'N/A'}
+                            {getCustomerName(order)}
                           </div>
                           <div className="text-slate-400 text-[10px] mt-0.5">
-                            {order.user?.email || order.email || ''}
+                            {getCustomerEmail(order)}
                           </div>
                         </div>
                       </td>
@@ -351,43 +369,33 @@ const Orders = ({ activeNav, setActiveNav }) => {
                           {order.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-center relative">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const id = order._id || order.id;
-                            setActiveDropdownId(activeDropdownId === id ? null : id);
-                          }}
-                          className="text-slate-400 hover:text-[#0a2f35] transition-colors font-bold tracking-widest cursor-pointer px-2 py-1"
-                        >
-                          ···
-                        </button>
-                        {activeDropdownId === (order._id || order.id) && (
-                          <div className="absolute right-6 top-10 z-50 w-28 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 flex flex-col text-left animate-in fade-in slide-in-from-top-2 duration-150">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedOrder(order);
-                                setIsViewModalOpen(true);
-                                setActiveDropdownId(null);
-                              }}
-                              className="px-4 py-2 hover:bg-slate-50 text-slate-600 font-bold transition-all text-xs flex items-center gap-1.5 w-full cursor-pointer"
-                            >
-                              <Eye className="w-3.5 h-3.5" /> View
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedOrder(order);
-                                setIsDeleteConfirmOpen(true);
-                                setActiveDropdownId(null);
-                              }}
-                              className="px-4 py-2 hover:bg-red-50 text-red-600 font-bold transition-all text-xs flex items-center gap-1.5 w-full cursor-pointer"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" /> Delete
-                            </button>
-                          </div>
-                        )}
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex items-center justify-center gap-3">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedOrder(order);
+                              setIsViewModalOpen(true);
+                            }}
+                            className="text-slate-400 hover:text-[#0a2f35] hover:bg-slate-50 transition-colors cursor-pointer p-2 rounded-xl border border-transparent hover:border-slate-200/40"
+                            title="View Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedOrder(order);
+                              setIsDeleteConfirmOpen(true);
+                            }}
+                            className="text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer p-2 rounded-xl border border-transparent hover:border-red-100/40"
+                            title="Delete Order"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -619,11 +627,11 @@ const Orders = ({ activeNav, setActiveNav }) => {
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Customer Information</p>
                   <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0a2f35] to-[#1d545c] flex items-center justify-center text-white font-extrabold text-sm flex-shrink-0">
-                      {(selectedOrder.user?.name || selectedOrder.name || 'U').charAt(0).toUpperCase()}
+                      {getCustomerName(selectedOrder).charAt(0).toUpperCase()}
                     </div>
                     <div className="leading-tight">
-                      <p className="font-bold text-slate-800 text-sm">{selectedOrder.user?.name || selectedOrder.name || 'N/A'}</p>
-                      <p className="text-slate-400 text-[11px] mt-0.5">{selectedOrder.user?.email || selectedOrder.email || 'N/A'}</p>
+                      <p className="font-bold text-slate-800 text-sm">{getCustomerName(selectedOrder)}</p>
+                      <p className="text-slate-400 text-[11px] mt-0.5">{getCustomerEmail(selectedOrder) || 'N/A'}</p>
                       {(selectedOrder.user?.phone || selectedOrder.phone) && (
                         <p className="text-slate-400 text-[11px]">{selectedOrder.user?.phone || selectedOrder.phone}</p>
                       )}
