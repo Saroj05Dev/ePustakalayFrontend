@@ -2,7 +2,8 @@
 import { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { loginUser, logout } from "../../redux/slices/authSlice"; 
+import { loginUser, logout } from "../../redux/slices/authSlice";
+import { Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 
 const ROLE_ROUTES = {
@@ -19,12 +20,10 @@ export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({ email: "", password: "" });
 
-  // Input change handler - empty validation alert strings dynamically
   const handleInputChange = useCallback((field) => (e) => {
     const value = e.target.value;
     setForm((prev) => ({ ...prev, [field]: value }));
 
-    // Type karte hi client-side validations ko UI element layer se hatana
     setErrors((prevErr) => {
       if (prevErr[field]) {
         return { ...prevErr, [field]: "" };
@@ -41,10 +40,8 @@ export default function LoginPage() {
 
     if (loading) return;
 
-    // Reset standard form state keys 
     setErrors({ email: "", password: "" });
 
-    // Client-side empty structure validation logic
     const newErrors = { email: "", password: "" };
     let isValid = true;
 
@@ -78,7 +75,6 @@ export default function LoginPage() {
         const payload = result.payload || {};
         const userData = payload?.user || payload?.data?.user || payload?.data || payload;
 
-        // Account lifecycle block evaluation
         if (userData?.status && userData.status !== "Active") {
           toast.error("Your account is deactivated or suspended. Please contact the administrator.");
           dispatch(logout());
@@ -88,23 +84,14 @@ export default function LoginPage() {
 
         const role = userData?.role || "user";
         const destination = ROLE_ROUTES[role] ?? "/";
-
-        toast.success(payload?.message || "Login successful!", { 
-          duration: 2500, 
-          position: 'top-center' 
-        });
-
-        setTimeout(() => {
-          navigate(destination, { replace: true });
-        }, 900);
+        navigate(destination, { replace: true });
 
       } else if (loginUser.rejected.match(result)) {
         // Safe fallback for backend string response parsing
-        const errorMessage = typeof result.payload === 'string' 
-          ? result.payload 
+        const errorMessage = typeof result.payload === 'string'
+          ? result.payload
           : "Invalid credentials. Please try again.";
 
-        // 🚀 TOAST TRIGGER ONLY: Ab login filter crashes sirf notification toast banner pe hi pop up honge
         toast.error(errorMessage, { duration: 4000, position: "top-center" });
       }
     } catch (err) {
@@ -143,7 +130,7 @@ export default function LoginPage() {
           </p>
 
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-            
+
             {/* Email Form Field Section */}
             <div className="flex flex-col gap-1.5">
               <label htmlFor="login-email" className="text-xs font-medium text-gray-600 uppercase tracking-wide">
@@ -199,9 +186,9 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute right-3 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
                 >
-                  {showPassword ? "🙈" : "👁️"}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
               {errors.password && (
