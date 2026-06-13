@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getAllBooks } from "../redux/slices/bookSlice";
 import { getAllCategories } from "../redux/slices/categorySlice";
+import { toggleWishlist, getAllWishlist } from "../redux/slices/wishlistSlice";
+import toast from "react-hot-toast";
 
 const colors = {
   primary: "#002629",
@@ -27,20 +29,26 @@ const colors = {
 
 const languages = ["All","English", "Hindi"];
 
-function BookCard({ book }) {
+function BookCard({ book, isInWishlist, onWishlistToggle }) {
   const [hovered, setHovered] = useState(false);
   const [added, setAdded] = useState(false);
+  const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
 
   const handleAdd = () => {
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };
 
-
+  const handleWishlistClick = async (e) => {
+    e.stopPropagation();
+    setIsTogglingWishlist(true);
+    await onWishlistToggle(book._id);
+    setIsTogglingWishlist(false);
+  };
 
   return (
     <div
-      className="flex flex-col rounded-xl overflow-hidden transition-all duration-300"
+      className="flex flex-col rounded-xl overflow-hidden transition-all duration-300 relative"
       style={{
         background: colors.surfaceContainerLowest,
         boxShadow: hovered
@@ -69,6 +77,21 @@ function BookCard({ book }) {
               : `${colors.primary}00`,
           }}
         />
+        
+        {/* Wishlist Heart Icon */}
+        <button
+          onClick={handleWishlistClick}
+          disabled={isTogglingWishlist}
+          className="absolute top-3 right-3 w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-200 active:scale-95 z-10"
+          style={{
+            background: isInWishlist ? colors.primary : 'rgba(255, 255, 255, 0.9)',
+            color: isInWishlist ? colors.onPrimary : colors.primary,
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill={isInWishlist ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
       </div>
       <div className="px-4 pb-6 flex-1 flex flex-col">
         <span
@@ -130,11 +153,33 @@ const navigate = useNavigate();
     (state) => state.categories.categoriesData || []
   );
 
+  const { wishlistData } = useSelector((state) => state.wishlist);
+  const { isLoggedIn } = useSelector((state) => state.auth);
   
   useEffect(() => {
       dispatch(getAllBooks());
       dispatch(getAllCategories());
-  }, [dispatch]);
+      if (isLoggedIn) {
+        dispatch(getAllWishlist());
+      }
+  }, [dispatch, isLoggedIn]);
+
+  const handleWishlistToggle = async (bookId) => {
+    if (!isLoggedIn) {
+      toast.error("Please login to add items to wishlist");
+      return;
+    }
+    await dispatch(toggleWishlist(bookId));
+    // Refresh wishlist after toggle
+    dispatch(getAllWishlist());
+  };
+
+  const isBookInWishlist = (bookId) => {
+    return wishlistData.some(item => {
+      const itemBookId = item.book && typeof item.book === 'object' ? item.book._id : item.book;
+      return itemBookId === bookId;
+    });
+  };
 
 
   const maxPrice =
@@ -475,7 +520,12 @@ switch (sortBy) {
           {/* Books Grid */}
            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-9xl mx-auto ">
             {sortedBooks.map((book) => (
-              <BookCard key={book._id} book={book} />
+              <BookCard 
+                key={book._id} 
+                book={book} 
+                isInWishlist={isBookInWishlist(book._id)}
+                onWishlistToggle={handleWishlistToggle}
+              />
             ))}
           </div> 
 

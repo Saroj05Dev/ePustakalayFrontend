@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllCategories } from "../redux/slices/categorySlice";
 import { getAllBooks } from "../redux/slices/bookSlice";
+import { toggleWishlist, getAllWishlist } from "../redux/slices/wishlistSlice";
 import toast from "react-hot-toast";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
@@ -119,15 +120,39 @@ function matchCategoryName(categories, concept) {
 }
 
 // ── Sub-components ─────────────────────────────────────────────────────────
-function BookCard({ book }) {
+function BookCard({ book, isInWishlist, onWishlistToggle }) {
+  const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
+
+  const handleWishlistClick = async (e) => {
+    e.stopPropagation();
+    setIsTogglingWishlist(true);
+    await onWishlistToggle(book._id || book.id);
+    setIsTogglingWishlist(false);
+  };
+
   return (
-    <div className="group bg-white p-6 rounded-xl hover:shadow-2xl hover:shadow-black/5 transition-all duration-300 hover:-translate-y-2">
-      <div className="aspect-[3/4] rounded-lg overflow-hidden mb-6 shadow-md bg-[#ebeef4]">
+    <div className="group bg-white p-6 rounded-xl hover:shadow-2xl hover:shadow-black/5 transition-all duration-300 hover:-translate-y-2 relative">
+      <div className="aspect-[3/4] rounded-lg overflow-hidden mb-6 shadow-md bg-[#ebeef4] relative">
         <img
           src={book.img}
           alt={book.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
+        
+        {/* Wishlist Heart Icon */}
+        <button
+          onClick={handleWishlistClick}
+          disabled={isTogglingWishlist}
+          className="absolute top-3 right-3 w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-200 active:scale-95 z-10"
+          style={{
+            background: isInWishlist ? '#002629' : 'rgba(255, 255, 255, 0.9)',
+            color: isInWishlist ? '#ffffff' : '#002629',
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill={isInWishlist ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
       </div>
       <div className="space-y-1">
         <span className="text-[10px] uppercase font-bold tracking-widest text-[#083d41]">
@@ -180,11 +205,16 @@ export default function HomePage() {
 
   const categories = useSelector((state) => state.categories?.categoriesData || []);
   const books = useSelector((state) => state.books?.booksData || []);
+  const { wishlistData } = useSelector((state) => state.wishlist);
+  const { isLoggedIn } = useSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(getAllCategories());
     dispatch(getAllBooks());
-  }, [dispatch]);
+    if (isLoggedIn) {
+      dispatch(getAllWishlist());
+    }
+  }, [dispatch, isLoggedIn]);
 
   const handleNewsletterSubmit = (e) => {
     e.preventDefault();
@@ -194,6 +224,23 @@ export default function HomePage() {
     } else {
       toast.error("Please enter a valid email address.");
     }
+  };
+
+  const handleWishlistToggle = async (bookId) => {
+    if (!isLoggedIn) {
+      toast.error("Please login to add items to wishlist");
+      return;
+    }
+    await dispatch(toggleWishlist(bookId));
+    // Refresh wishlist after toggle
+    dispatch(getAllWishlist());
+  };
+
+  const isBookInWishlist = (bookId) => {
+    return wishlistData.some(item => {
+      const itemBookId = item.book && typeof item.book === 'object' ? item.book._id : item.book;
+      return itemBookId === bookId;
+    });
   };
 
   const bentoCards = STATIC_CAT_IMAGES.map((slot, index) => {
@@ -406,7 +453,12 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {displayBooks.map((book) => (
-              <BookCard key={book.id} book={book} />
+              <BookCard 
+                key={book.id} 
+                book={book} 
+                isInWishlist={isBookInWishlist(book.id)}
+                onWishlistToggle={handleWishlistToggle}
+              />
             ))}
           </div>
         </section>
