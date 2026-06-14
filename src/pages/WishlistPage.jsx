@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { getAllWishlist, deleteWishlistItem, updateWishlistStatus } from '../redux/slices/wishlistSlice';
+import { useNavigate } from 'react-router-dom';
 
 export default function WishlistContent() {
+  const  navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
   const { wishlistData, isLoading } = useSelector((state) => state.wishlist);
@@ -185,7 +187,7 @@ export default function WishlistContent() {
                       
                       {/* View Details Button */}
                       <button 
-                        onClick={() => window.location.href = `/books/${book._id}`}
+                        onClick={() => navigate(`/books/${book._id}`)}
                         className="w-full py-2.5 bg-[#002629] text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition-all hover:bg-[#083d41] active:scale-[0.98] mb-2"
                       >
                         <span className="material-symbols-outlined !text-[18px] leading-none">visibility</span>
