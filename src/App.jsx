@@ -14,6 +14,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./layout/Layout";
 import PublicLayout from "./layout/publicLayout";
 import BooksPage from "./pages/BooksPage";
+import BookdetailPage from "./pages/BookdetailPage";
 import WishlistPage from "./pages/WishlistPage";
 import MyAccount from "./pages/MyAccount";
 import { getMe, setAuthCheckComplete } from "./redux/slices/authSlice";
@@ -35,10 +36,39 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />
-        <Route path="/books" element={<PublicLayout><BooksPage /></PublicLayout>}/>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
+        <Route 
+        path="/" 
+        element={
+        <PublicLayout><HomePage /></PublicLayout>
+        } 
+        />
+
+        <Route 
+        path="/books" 
+        element={
+        <PublicLayout><BooksPage /></PublicLayout>
+        }
+        />
+        
+        <Route path="/books/:id"
+         element={
+         <PublicLayout><BookdetailPage /></PublicLayout>
+         } 
+         />
+
+        <Route 
+        path="/login" 
+        element={
+        <LoginPage />
+        }
+         />
+
+        <Route 
+        path="/signup" 
+        element={
+        <SignupPage />
+        } 
+        />
 
         <Route
           path="/admin"

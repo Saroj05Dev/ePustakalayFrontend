@@ -30,6 +30,7 @@ const colors = {
 const languages = ["All","English", "Hindi"];
 
 function BookCard({ book, isInWishlist, onWishlistToggle }) {
+  const navigate = useNavigate();
   const [hovered, setHovered] = useState(false);
   const [added, setAdded] = useState(false);
   const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
@@ -49,6 +50,7 @@ function BookCard({ book, isInWishlist, onWishlistToggle }) {
   return (
     <div
       className="flex flex-col rounded-xl overflow-hidden transition-all duration-300 relative"
+      onClick={() => navigate(`/books/${book._id}`)}
       style={{
         background: colors.surfaceContainerLowest,
         boxShadow: hovered
