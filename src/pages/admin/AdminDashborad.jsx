@@ -269,14 +269,10 @@ const AdminDashboard = ({ activeNav, setActiveNav }) => {
   return (
     <AdminLayout activeNav={activeNav} setActiveNav={setActiveNav}>
       <div className="space-y-6">
-
-        {/* Page header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight font-sans">Dashboard Overview</h1>
-            <p className="text-sm text-slate-400 mt-0.5 font-medium">Welcome back, Curator. Here's what's happening today.</p>
+            <h1 className="text-3xl font-bold text-mint-800 tracking-tight font-sans">Dashboard Overview</h1>
           </div>
-          {/* Date range */}
           <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100/80 border border-slate-200/50 self-start sm:self-auto">
             {[["30", "Last 30 Days"], ["90", "90 Days"]].map(([k, l]) => (
               <button key={k} onClick={() => setRange(k)}
@@ -292,7 +288,6 @@ const AdminDashboard = ({ activeNav, setActiveNav }) => {
           </div>
         </div>
 
-        {/* KPI cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
           <KpiCard
             icon={<BookOpen className="w-5 h-5" />}

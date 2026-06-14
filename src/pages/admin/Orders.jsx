@@ -160,7 +160,6 @@ const Orders = ({ activeNav, setActiveNav }) => {
   const pageStart = filteredOrders.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const pageEnd = Math.min(currentPage * itemsPerPage, filteredOrders.length);
 
-  // ── Export Report as CSV ──────────────────────────────────────
   const handleExportCSV = () => {
     if (filteredOrders.length === 0) { toast.error('No orders to export'); return; }
     const headers = ['Order ID', 'Customer Name', 'Email', 'Date', 'Total Amount', 'Payment Method', 'Status'];
@@ -178,13 +177,12 @@ const Orders = ({ activeNav, setActiveNav }) => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `orders_report_${new Date().toISOString().slice(0,10)}.csv`;
+    link.download = `orders_report_${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
     toast.success(`Exported ${filteredOrders.length} orders to CSV`);
   };
 
-  // ── Start Processing (mark all Pending → Shipped) ─────────────
   const handleStartProcessing = () => {
     const pendingOrders = ordersData.filter(o => o.status === 'Pending');
     if (pendingOrders.length === 0) { toast('No pending orders to process', { icon: 'ℹ️' }); return; }
@@ -195,7 +193,6 @@ const Orders = ({ activeNav, setActiveNav }) => {
     }, 1800);
   };
 
-  // ── Manual Entry submit ────────────────────────────────────────
   const handleManualEntrySubmit = (e) => {
     e.preventDefault();
     if (!manualEntry.customerName.trim() || !manualEntry.amount) return;
@@ -210,8 +207,7 @@ const Orders = ({ activeNav, setActiveNav }) => {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight font-sans">Orders Management</h1>
-            <p className="text-sm text-slate-400 mt-0.5 font-medium">Monitor and process reading material transactions globally.</p>
+            <h1 className="text-3xl font-bold text-slate-800 tracking-tight font-sans">Orders Management</h1>
           </div>
 
           <div className="flex items-center gap-2.5 self-start sm:self-auto">

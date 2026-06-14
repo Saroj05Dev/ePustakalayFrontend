@@ -19,7 +19,6 @@ import {
 } from 'lucide-react';
 import { getAllUsers, registerUser, updateUser, deleteUser } from '../../redux/slices/authSlice';
 
-/* ─── Role mapping helpers ───────────────────────────────────────────────────── */
 const toFrontendRole = (role) => {
     switch (role) {
         case "admin":
@@ -81,7 +80,6 @@ const Users = ({ activeNav, setActiveNav }) => {
     const [showFiltersMenu, setShowFiltersMenu] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
 
-    // Add User Modal State
     const [isAddUserOpen, setIsAddUserOpen] = useState(false);
     const [newUserData, setNewUserData] = useState({
         name: "",
@@ -96,7 +94,6 @@ const Users = ({ activeNav, setActiveNav }) => {
         dispatch(getAllUsers());
     }, [dispatch]);
 
-    // Listen to global search events from Header
     useEffect(() => {
         const handleGlobalSearch = (e) => {
             setSearchTerm(e.detail || "");
@@ -107,7 +104,6 @@ const Users = ({ activeNav, setActiveNav }) => {
         };
     }, []);
 
-    // Filtered Users List
     const filteredUsers = useMemo(() => {
         return users.map(user => ({
             ...user,
@@ -125,7 +121,6 @@ const Users = ({ activeNav, setActiveNav }) => {
         });
     }, [users, searchTerm, roleFilter, statusFilter]);
 
-    // Reset to page 1 when filters change
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm, roleFilter, statusFilter]);
@@ -139,7 +134,6 @@ const Users = ({ activeNav, setActiveNav }) => {
     const pageStart = filteredUsers.length === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1;
     const pageEnd = Math.min(currentPage * ITEMS_PER_PAGE, filteredUsers.length);
 
-    // Generate page number buttons (show up to 5 around current)
     const getPageNumbers = () => {
         const pages = [];
         const maxVisible = 5;
@@ -162,7 +156,6 @@ const Users = ({ activeNav, setActiveNav }) => {
         e.preventDefault();
         if (!newUserData.name.trim() || !newUserData.email.trim() || !newUserData.password || !newUserData.phone) return;
 
-        // Map frontend role to backend role
         const backendRole = newUserData.role === "Admin" ? "admin" : newUserData.role === "Curator" ? "seller" : "user";
 
         const userData = {
@@ -178,7 +171,7 @@ const Users = ({ activeNav, setActiveNav }) => {
         if (registerUser.fulfilled.match(resultAction)) {
             setIsAddUserOpen(false);
             dispatch(getAllUsers());
-            // Reset Form
+
             setNewUserData({
                 name: "",
                 email: "",
@@ -212,9 +205,7 @@ const Users = ({ activeNav, setActiveNav }) => {
         window.dispatchEvent(new CustomEvent('resetSearch', { detail: "" }));
     };
 
-    // Derived counts for KPI cards
     const registrationsThisMonth = useMemo(() => {
-        // mock or actual filter
         return users.length;
     }, [users]);
 
@@ -232,15 +223,13 @@ const Users = ({ activeNav, setActiveNav }) => {
         <AdminLayout activeNav={activeNav} setActiveNav={setActiveNav}>
             <div className="space-y-6">
 
-                {/* Header Section */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-800 tracking-tight font-sans">Users</h1>
-                        <p className="text-sm text-slate-400 mt-0.5 font-medium">Manage platform members, permissions, and account statuses.</p>
+                        <h1 className="text-3xl font-bold text-slate-800 tracking-tight font-sans">Users</h1>
+                        {/* <p className="text-sm text-slate-400 mt-0.5 font-medium">Manage platform members, permissions, and account statuses.</p> */}
                     </div>
 
                     <div className="flex items-center gap-2.5 self-start sm:self-auto">
-                        {/* Filters toggle */}
                         <button
                             onClick={() => setShowFiltersMenu(!showFiltersMenu)}
                             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold border text-xs transition-all cursor-pointer ${showFiltersMenu ? 'border-[#0a2f35] text-[#0a2f35] bg-[#0a2f35]/5' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
@@ -248,7 +237,6 @@ const Users = ({ activeNav, setActiveNav }) => {
                             <Filter className="w-3.5 h-3.5" /> Filters
                         </button>
 
-                        {/* Add New User */}
                         <button
                             onClick={() => setIsAddUserOpen(true)}
                             className="bg-[#0a2f35] hover:bg-[#072226] text-white px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-xs shadow-md shadow-[#0a2f35]/10 whitespace-nowrap cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
@@ -258,12 +246,10 @@ const Users = ({ activeNav, setActiveNav }) => {
                     </div>
                 </div>
 
-                {/* Floating / Inline Filters Submenu */}
                 {showFiltersMenu && (
                     <div className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm flex flex-wrap gap-4 items-center animate-in slide-in-from-top-3 duration-200">
                         <div className="text-xs font-bold text-[#0a2f35] mr-1">Quick Filters:</div>
 
-                        {/* Role select */}
                         <div className="flex items-center gap-1.5">
                             <span className="text-[11px] font-bold text-slate-400">Role:</span>
                             <select
@@ -278,7 +264,6 @@ const Users = ({ activeNav, setActiveNav }) => {
                             </select>
                         </div>
 
-                        {/* Status select */}
                         <div className="flex items-center gap-1.5">
                             <span className="text-[11px] font-bold text-slate-400">Status:</span>
                             <select
@@ -302,9 +287,7 @@ const Users = ({ activeNav, setActiveNav }) => {
                     </div>
                 )}
 
-                {/* Main Table Section */}
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                    {/* Table Component */}
                     <div className="overflow-x-auto">
                         <table className="w-full text-left min-w-[700px]">
                             <thead>
@@ -337,7 +320,6 @@ const Users = ({ activeNav, setActiveNav }) => {
                                         const avatarUrl = `https://i.pravatar.cc/150?u=${user._id}`;
                                         return (
                                             <tr key={user._id} className="hover:bg-slate-50/40 transition-colors group">
-                                                {/* User Entity */}
                                                 <td className="px-6 py-4.5 flex items-center gap-3">
                                                     <img
                                                         src={avatarUrl}
@@ -350,14 +332,12 @@ const Users = ({ activeNav, setActiveNav }) => {
                                                     </div>
                                                 </td>
 
-                                                {/* Permission Role */}
                                                 <td className="px-6 py-4.5">
                                                     <span className={getRoleBadgeClass(user.frontendRole)}>
                                                         {user.frontendRole}
                                                     </span>
                                                 </td>
 
-                                                {/* Lifecycle Status */}
                                                 <td className="px-6 py-4.5">
                                                     <div className="flex items-center gap-1.5">
                                                         <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot}`}></span>
@@ -365,15 +345,12 @@ const Users = ({ activeNav, setActiveNav }) => {
                                                     </div>
                                                 </td>
 
-                                                {/* Join Date */}
                                                 <td className="px-6 py-4.5 text-slate-400 font-semibold">
                                                     {joinDate}
                                                 </td>
 
-                                                {/* Actions */}
                                                 <td className="px-6 py-4.5 text-center">
                                                     <div className="flex items-center justify-center gap-2">
-                                                        {/* Access Toggle Icon Button */}
                                                         {user.role !== 'admin' && (
                                                             <button
                                                                 onClick={() => toggleUserStatus(user._id)}
@@ -390,7 +367,6 @@ const Users = ({ activeNav, setActiveNav }) => {
                                                             </button>
                                                         )}
 
-                                                        {/* Delete User */}
                                                         <button
                                                             onClick={() => handleDeleteUser(user._id)}
                                                             className="text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all p-2 rounded-xl border border-transparent hover:border-red-100/40"
@@ -408,7 +384,6 @@ const Users = ({ activeNav, setActiveNav }) => {
                         </table>
                     </div>
 
-                    {/* Pagination Panel */}
                     <div className="p-5 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
                         <span className="text-slate-400 font-semibold">
                             Showing <span className="font-bold text-slate-700">{pageStart} - {pageEnd}</span> of <span className="font-bold text-slate-700">{filteredUsers.length}</span> curators and readers
@@ -423,8 +398,6 @@ const Users = ({ activeNav, setActiveNav }) => {
                             >
                                 <ChevronLeft className="w-3.5 h-3.5" />
                             </button>
-
-                            {/* Page Numbers */}
                             {getPageNumbers().map(page => (
                                 <button
                                     key={page}
@@ -438,7 +411,6 @@ const Users = ({ activeNav, setActiveNav }) => {
                                 </button>
                             ))}
 
-                            {/* Next */}
                             <button
                                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                 disabled={currentPage === totalPages}
@@ -450,9 +422,7 @@ const Users = ({ activeNav, setActiveNav }) => {
                     </div>
                 </div>
 
-                {/* Bottom KPI Cards matching the Mockup */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    {/* KPI Card 1: New Registrations */}
                     <div className="bg-[#edf6f5] p-5 rounded-2xl border border-slate-100 flex flex-col gap-2 hover:shadow-sm transition-all duration-200">
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-white text-[#0f766e] shadow-sm border border-[#0f766e]/5">
                             <TrendingUp className="w-5 h-5" />
@@ -465,7 +435,6 @@ const Users = ({ activeNav, setActiveNav }) => {
                         </div>
                     </div>
 
-                    {/* KPI Card 2: Active Rate */}
                     <div className="bg-[#eff6ff] p-5 rounded-2xl border border-slate-100 flex flex-col gap-2 hover:shadow-sm transition-all duration-200">
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-white text-blue-600 shadow-sm border border-blue-500/5">
                             <UserCheck className="w-5 h-5" />
@@ -478,7 +447,6 @@ const Users = ({ activeNav, setActiveNav }) => {
                         </div>
                     </div>
 
-                    {/* KPI Card 3: Flagged Accounts */}
                     <div className="bg-[#fff5f5] p-5 rounded-2xl border border-red-100 flex flex-col gap-2 hover:shadow-sm transition-all duration-200">
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-white text-red-600 shadow-sm border border-red-500/5">
                             <AlertCircle className="w-5 h-5" />
@@ -494,11 +462,9 @@ const Users = ({ activeNav, setActiveNav }) => {
 
             </div>
 
-            {/* Add New User Modal */}
             {isAddUserOpen && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
                     <div className="bg-white w-full max-w-md rounded-3xl border border-slate-100 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-                        {/* Modal Header */}
                         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
                             <div className="flex items-center gap-2">
                                 <User className="w-5 h-5 text-[#0a2f35]" />
@@ -512,7 +478,6 @@ const Users = ({ activeNav, setActiveNav }) => {
                             </button>
                         </div>
 
-                        {/* Modal Form */}
                         <form onSubmit={handleAddUserSubmit}>
                             <div className="p-6 space-y-4 text-xs font-sans">
                                 {/* Full Name */}
@@ -529,7 +494,6 @@ const Users = ({ activeNav, setActiveNav }) => {
                                     />
                                 </div>
 
-                                {/* Email Address */}
                                 <div>
                                     <label className="block text-slate-500 font-bold mb-1">Email Address *</label>
                                     <input
@@ -572,7 +536,6 @@ const Users = ({ activeNav, setActiveNav }) => {
                                     />
                                 </div>
 
-                                {/* Role and Initial Status */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-slate-500 font-bold mb-1">Permission Role</label>
@@ -603,7 +566,6 @@ const Users = ({ activeNav, setActiveNav }) => {
                                 </div>
                             </div>
 
-                            {/* Modal Footer */}
                             <div className="px-6 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-2.5">
                                 <button
                                     type="button"

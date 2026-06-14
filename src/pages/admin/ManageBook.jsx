@@ -182,7 +182,6 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
     dispatch(getAllUsers());
   }, [dispatch]);
 
-  // Fetch chapters for all books via direct API calls (avoids overwriting Redux chaptersData)
   useEffect(() => {
     if (reduxBooks.length === 0) return;
     let cancelled = false;
@@ -209,7 +208,6 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
     return () => { cancelled = true; };
   }, [reduxBooks.length]);
 
-  // Listen to header global search
   const [searchTerm, setSearchTerm] = useState('');
   useEffect(() => {
     const handleGlobalSearch = (e) => {
@@ -392,15 +390,11 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <div className="text-xs text-slate-400 font-semibold mb-1">
-              Dashboard / <span className="text-slate-600 font-bold">Manage Books</span>
-            </div>
-            <h1 className="text-2xl font-bold text-[#0a2f35] mb-1 font-sans tracking-tight">Manage Books</h1>
-            <p className="text-slate-400 text-sm font-semibold">Review and curate the ePustakalay digital collection.</p>
+            <h1 className="text-3xl font-bold text-[#0a2f35] mb-1 font-sans tracking-tight">Manage Books</h1>
+            <p className="text-slate-400 text-sm font-semibold">Review and create the ePustakalay digital collection.</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            {/* Category buttons */}
             <button
               onClick={() => { setCategorySearch(''); setModal('showCategories'); }}
               className="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-xs whitespace-nowrap cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
