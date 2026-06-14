@@ -104,7 +104,6 @@ const Header = ({ toggleSidebar }) => {
     const val = e.target.value;
     setSearchValue(val);
     if (isOnBooksPage) {
-      // instant in-page filter via event
       window.dispatchEvent(new CustomEvent('globalSearch', { detail: val }));
     }
   };
@@ -140,7 +139,6 @@ const Header = ({ toggleSidebar }) => {
     return () => window.removeEventListener('resetSearch', handleReset);
   }, []);
 
-  // When navigating away from books page, clear search
   useEffect(() => {
     if (!isOnBooksPage) {
       setSearchValue('');
@@ -150,7 +148,6 @@ const Header = ({ toggleSidebar }) => {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 h-[70px] bg-white border-b border-slate-100 flex items-center justify-between px-6 z-50 transition-all">
-        {/* Left Side: Mobile Hamburger, Logo, and Desktop Search */}
         <div className="flex items-center gap-4">
           <button
             className="block lg:hidden text-slate-500 bg-transparent border-none cursor-pointer hover:text-[#0a2f35] transition-colors flex items-center justify-center p-1"
@@ -159,7 +156,6 @@ const Header = ({ toggleSidebar }) => {
             <Menu className="w-5.5 h-5.5" />
           </button>
 
-          {/* Logo Branding */}
           <div className="flex items-center gap-2.5 text-lg font-extrabold text-[#0a2f35] tracking-tight">
             <div className="w-8.5 h-8.5 rounded-lg bg-[#0a2f35]/5 flex items-center justify-center border border-[#0a2f35]/10">
               <BookOpen className="w-4.5 h-4.5 text-[#0a2f35]" />
@@ -167,7 +163,6 @@ const Header = ({ toggleSidebar }) => {
             <span className="hidden sm:inline">ePustakalay</span>
           </div>
 
-          {/* Header Search Bar (Desktop only) */}
           <div className="hidden lg:flex items-center bg-[#f1f5f9] rounded-full px-4 py-2 w-[300px] ml-4 border border-slate-200/50 hover:border-slate-300/60 focus-within:border-[#0a2f35]/25 focus-within:bg-white transition-all group">
             <button onClick={handleSearchSubmit} className="bg-transparent border-none p-0 cursor-pointer flex-shrink-0" tabIndex={-1}>
               <Search className="w-4 h-4 text-slate-400 hover:text-[#0a2f35] transition-colors" />
@@ -265,8 +260,6 @@ const Header = ({ toggleSidebar }) => {
               )}
             </div>
 
-
-
           </div>
 
           {/* User Profile Avatar & Dropdown */}
@@ -296,7 +289,6 @@ const Header = ({ toggleSidebar }) => {
                   </span>
                 </div>
 
-                {/* Profile Information List */}
                 <div className="py-3.5 space-y-2.5 border-b border-slate-100 text-[11px]">
                   {displayEmail && (
                     <div className="flex items-center gap-2 text-slate-500">
@@ -304,19 +296,18 @@ const Header = ({ toggleSidebar }) => {
                       <span className="truncate">{displayEmail}</span>
                     </div>
                   )}
-                  {data?._id && (
+                  {/* {data?._id && (
                     <div className="flex items-center gap-2 text-slate-500">
                       <User className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                       <span className="truncate">ID: {data._id}</span>
                     </div>
-                  )}
+                  )} */}
                   <div className="flex items-center gap-2 text-slate-500">
                     <Shield className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                     <span>Access Role: {roleLabel}</span>
                   </div>
                 </div>
 
-                {/* Action Items */}
                 <div className="pt-3.5 flex flex-col gap-1">
                   <button
                     onClick={() => {
@@ -340,7 +331,6 @@ const Header = ({ toggleSidebar }) => {
         </div>
       </header>
 
-      {/* Global Settings Modal Overlay */}
       {isSettingsOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-lg rounded-3xl border border-slate-100 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">

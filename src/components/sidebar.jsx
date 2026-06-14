@@ -9,16 +9,16 @@ import { logout } from '../redux/slices/authSlice';
 
 /* ─── Nav items ──────────────────────────────────────────────── */
 const navItems = [
-  { label: "Dashboard",    icon: LayoutDashboard, to: "/admin" },
-  { label: "Manage Books", icon: BookOpen,         to: "/admin/books" },
-  { label: "Users",        icon: Users,            to: "/admin/users" },
-  { label: "Orders",       icon: ClipboardList,    to: "/admin/orders" },
+  { label: "Dashboard", icon: LayoutDashboard, to: "/admin" },
+  { label: "Manage Books", icon: BookOpen, to: "/admin/books" },
+  { label: "Users", icon: Users, to: "/admin/users" },
+  { label: "Orders", icon: ClipboardList, to: "/admin/orders" },
 ];
 
 /* ─── Role label map ─────────────────────────────────────────── */
 const ROLE_LABELS = {
-  admin:  "Administrator",
-  user:   "Member",
+  admin: "Administrator",
+  user: "Member",
   seller: "Curator",
 };
 
@@ -128,8 +128,8 @@ function ProfilePanel({ data, role, displayName, roleLabel, onClose, onLogout })
             <div className="min-w-0">
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Permission Role</p>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="font-bold text-xs text-slate-700">{roleLabel}</span>
-                <span className="text-[9px] font-bold bg-[#0a2f35]/10 text-[#0a2f35] px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                {/* <span className="font-bold text-xs text-slate-700">{roleLabel}</span> */}
+                <span className="text-[9px] font-bold bg-green-100 text-[#0a2f35] px-1.5 py-0.5 rounded-full uppercase tracking-wide">
                   {role || 'admin'}
                 </span>
               </div>
