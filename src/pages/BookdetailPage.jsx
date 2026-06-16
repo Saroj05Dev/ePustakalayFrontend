@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
+import { getAllBooks } from "../redux/slices/bookSlice";
 
 const colors = {
   primary: "#002629",
@@ -100,21 +101,54 @@ const reviews = [
 const navLinks = ["Home", "Books", "Wishlist"];
 
 export default function BookdetailPage() {
+  const dispatch = useDispatch();
   const [activeNav, setActiveNav] = useState("Books");
   const [cartAdded, setCartAdded] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
 
   const { id } = useParams();
 
-const books = useSelector(
-    (state) => state.books.booksData || []
-);
+  const books = useSelector((state) => state.books.booksData || []);
+  const isLoading = useSelector((state) => state.books.isLoading);
 
-const book = books.find((b) => b._id === id);
+  // Fetch books if not already loaded
+  useEffect(() => {
+    if (books.length === 0) {
+      dispatch(getAllBooks());
+    }
+  }, [dispatch, books.length]);
 
-if(!book){
-    return <h1>Loading...</h1>
-}
+  const book = books.find((b) => b._id === id);
+
+  // Show loading state
+  if (isLoading || (!book && books.length === 0)) {
+    return (
+      <div style={{ background: colors.surface, minHeight: "100vh" }} className="flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#002629] border-r-transparent"></div>
+          <p className="mt-4 text-[#404849] font-medium">Loading book details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if book not found after loading
+  if (!book) {
+    return (
+      <div style={{ background: colors.surface, minHeight: "100vh" }} className="flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <h1 className="text-3xl font-bold text-[#002629] mb-4 font-['Manrope']">Book Not Found</h1>
+          <p className="text-[#404849] mb-6">Sorry, we couldn't find the book you're looking for.</p>
+          <a
+            href="/books"
+            className="inline-block px-6 py-3 bg-gradient-to-r from-[#002629] to-[#083d41] text-white rounded-lg font-semibold hover:opacity-95 transition-opacity no-underline"
+          >
+            Browse All Books
+          </a>
+        </div>
+      </div>
+    );
+  }
 
 
   const handleCart = () => {
@@ -150,11 +184,11 @@ const metaItems = [
 
       
       {/* MAIN */}
-      <main style={{ maxWidth: 1280, margin: "0 auto", padding: "100px 16px 64px" }} className="md:px-8 md:pt-32 md:pb-24">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 pt-24 sm:pt-28 md:pt-32 pb-16 md:pb-20 lg:pb-24">
         {/* Book Detail Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 lg:gap-16 items-start">
           {/* Left: Cover */}
-          <div className="lg:col-span-5" style={{ position: "relative" }}>
+          <div className="md:col-span-5" style={{ position: "relative" }}>
             <div
               className="cover-hover"
               style={{
@@ -181,50 +215,50 @@ const metaItems = [
           </div>
 
           {/* Right: Details */}
-          <div className="lg:col-span-7" style={{ display: "flex", flexDirection: "column", gap: 24 }} className="md:gap-8">
+          <div className="md:col-span-7 md:gap-8" style={{ display: "flex", flexDirection: "column", gap: 24 }}>
             {/* Title & Author */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }} className="md:gap-4">
-              <h1 className="font-headline" style={{ fontSize: 32, fontWeight: 800, color: colors.primary, letterSpacing: "-1px", lineHeight: 1.05, margin: 0 }} className="md:text-5xl lg:text-[52px] md:tracking-[-2px]">
+            <div className="md:gap-4" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <h1 className="font-headline md:text-5xl lg:text-[52px] md:tracking-[-2px]" style={{ fontSize: 32, fontWeight: 800, color: colors.primary, letterSpacing: "-1px", lineHeight: 1.05, margin: 0 }}>
                 {book.title}
               </h1>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }} className="md:gap-4">
-                <span style={{ fontSize: 15, color: colors.onSurfaceVariant, fontWeight: 500 }} className="md:text-lg"> {book.author} </span>
+              <div className="md:gap-4" style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                <span className="md:text-lg" style={{ fontSize: 15, color: colors.onSurfaceVariant, fontWeight: 500 }}> {book.author} </span>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: colors.outlineVariant, display: "inline-block" }} />
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   <StarIcon filled size={14} />
-                  <span style={{ fontWeight: 700, fontSize: 14 }} className="md:text-[15px]">4.8</span>
-                  <span style={{ color: colors.onSurfaceVariant, fontSize: 13 }} className="md:text-sm">(1,240 reviews)</span>
+                  <span className="md:text-[15px]" style={{ fontWeight: 700, fontSize: 14 }}>4.8</span>
+                  <span className="md:text-sm" style={{ color: colors.onSurfaceVariant, fontSize: 13 }}>(1,240 reviews)</span>
                 </div>
               </div>
             </div>
 
             {/* Price */}
-            <div className="font-headline" style={{ fontSize: 32, fontWeight: 800, color: colors.primaryContainer }} className="md:text-[38px]">
+            <div className="font-headline md:text-[38px]" style={{ fontSize: 32, fontWeight: 800, color: colors.primaryContainer }}>
              ₹{book.price}
             </div>
 
             {/* Synopsis */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }} className="md:gap-3">
-              <h3 className="font-headline" style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: colors.onSurfaceVariant, margin: 0 }} className="md:text-[11px]">
+            <div className="md:gap-3" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <h3 className="font-headline md:text-[11px]" style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: colors.onSurfaceVariant, margin: 0 }}>
                 Synopsis
               </h3>
-              <p style={{ fontSize: 15, lineHeight: 1.75, color: `${colors.onSurface}cc`, maxWidth: 560, margin: 0 }} className="md:text-[17px]">
+              <p className="md:text-[17px]" style={{ fontSize: 15, lineHeight: 1.75, color: `${colors.onSurface}cc`, maxWidth: 560, margin: 0 }}>
                 {book.description}
               </p>
             </div>
 
             {/* Meta Bento */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }} className="sm:grid-cols-4 md:gap-3">
+            <div className="sm:grid-cols-4 md:gap-3" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
               {metaItems.map(({ label, value }) => (
-                <div key={label} style={{ background: colors.surfaceContainerLow, padding: "12px", borderRadius: 10 }} className="md:p-4">
-                  <span style={{ display: "block", fontSize: 9, letterSpacing: 2, textTransform: "uppercase", color: colors.onSurfaceVariant, marginBottom: 4 }} className="md:text-[10px]">{label}</span>
-                  <span style={{ fontWeight: 700, fontSize: 13 }} className="md:text-[15px]">{value}</span>
+                <div key={label} className="md:p-4" style={{ background: colors.surfaceContainerLow, padding: "12px", borderRadius: 10 }}>
+                  <span className="md:text-[10px]" style={{ display: "block", fontSize: 9, letterSpacing: 2, textTransform: "uppercase", color: colors.onSurfaceVariant, marginBottom: 4 }}>{label}</span>
+                  <span className="md:text-[15px]" style={{ fontWeight: 700, fontSize: 13 }}>{value}</span>
                 </div>
               ))}
             </div>
 
             {/* Actions */}
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }} className="md:gap-4">
+            <div className="md:gap-4" style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
               <button
                 className="book-gradient btn-scale font-headline"
                 onClick={handleCart}
@@ -258,57 +292,55 @@ const metaItems = [
         </div>
 
         {/* Reviews Section */}
-        <section style={{ marginTop: 64 }} className="md:mt-24">
-          <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 32 }} className="sm:flex-row sm:justify-between sm:items-end md:mb-12">
+        <section className="md:mt-24" style={{ marginTop: 64 }}>
+          <div className="sm:flex-row sm:justify-between sm:items-end md:mb-12" style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 32 }}>
             <div>
-              <h2 className="font-headline" style={{ fontSize: 28, fontWeight: 800, color: colors.primary, margin: "0 0 6px 0" }} className="md:text-4xl">
+              <h2 className="font-headline md:text-4xl" style={{ fontSize: 28, fontWeight: 800, color: colors.primary, margin: "0 0 6px 0" }}>
                 Reader Reviews
               </h2>
-              <p style={{ color: colors.onSurfaceVariant, margin: 0, fontSize: 14 }} className="md:text-base">Hear from our community of book lovers.</p>
+              <p className="md:text-base" style={{ color: colors.onSurfaceVariant, margin: 0, fontSize: 14 }}>Hear from our community of book lovers.</p>
             </div>
             <button
-              className="review-btn font-headline"
+              className="review-btn font-headline md:text-[15px] md:gap-2"
               style={{
                 background: "transparent", border: "none", cursor: "pointer", color: colors.primary,
                 fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", gap: 6,
               }}
-              className="md:text-[15px] md:gap-2"
             >
               Write a Review
               <span className="review-arrow"><ArrowRightIcon size={16} /></span>
             </button>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20 }} className="sm:grid-cols-2 lg:grid-cols-3 md:gap-7">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20 }} className="md:grid-cols-2 lg:grid-cols-3 md:gap-7">
             {reviews.map((r, i) => (
               <div
                 key={i}
+                className="md:p-8 md:gap-5"
                 style={{
                   background: colors.surfaceContainerLowest, padding: 24, borderRadius: 14,
                   boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: `1px solid ${colors.outlineVariant}20`,
                   display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 16,
                 }}
-                className="md:p-8 md:gap-5"
               >
                 <div>
-                  <div style={{ display: "flex", gap: 2, marginBottom: 12 }} className="md:mb-4">
+                  <div className="md:mb-4" style={{ display: "flex", gap: 2, marginBottom: 12 }}>
                     {[...Array(5)].map((_, s) => <StarIcon key={s} filled={s < r.stars} size={15} />)}
                   </div>
-                  <p style={{ color: `${colors.onSurface}e8`, fontStyle: "italic", lineHeight: 1.7, margin: 0, fontSize: 14 }} className="md:text-base">
+                  <p className="md:text-base" style={{ color: `${colors.onSurface}e8`, fontStyle: "italic", lineHeight: 1.7, margin: 0, fontSize: 14 }}>
                     "{r.text}"
                   </p>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }} className="md:gap-3">
-                  <div style={{
+                <div className="md:gap-3" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div className="font-headline md:w-10 md:h-10 md:text-[13px]" style={{
                     width: 36, height: 36, borderRadius: "50%",
                     background: `${colors.primaryContainer}18`, color: colors.primary,
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontWeight: 700, fontSize: 12,
-                  }}
-                    className="font-headline md:w-10 md:h-10 md:text-[13px]">{r.initials}</div>
+                  }}>{r.initials}</div>
                   <div>
-                    <p style={{ fontWeight: 700, fontSize: 13, margin: 0 }} className="md:text-sm">{r.name}</p>
-                    <p style={{ fontSize: 11, color: colors.onSurfaceVariant, margin: 0 }} className="md:text-xs">{r.label}</p>
+                    <p className="md:text-sm" style={{ fontWeight: 700, fontSize: 13, margin: 0 }}>{r.name}</p>
+                    <p className="md:text-xs" style={{ fontSize: 11, color: colors.onSurfaceVariant, margin: 0 }}>{r.label}</p>
                   </div>
                 </div>
               </div>

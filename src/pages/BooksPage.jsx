@@ -524,7 +524,7 @@ export default function EPustakalay() {
         </aside>
 
         {/* Main */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 pt-20 md:pt-22">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 pt-24 md:pt-28">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6 mb-8 md:mb-12">
             <div className="max-w-xl">
