@@ -94,24 +94,13 @@ export default function Navbar() {
               className="bg-transparent outline-none ml-2 text-sm w-full"
             />
           </div>
-
-          {/* Mobile Search Icon */}
-          <button 
-            onClick={() => setShowMobileSearch(true)}
-            className="lg:hidden p-2 hover:bg-slate-200 rounded-lg transition-colors"
-            aria-label="Search"
+          <NavLink 
+          to="/carts"
+          aria-label="View shopping cart"
           >
-            <Search size={20} className="text-slate-600" />
-          </button>
-
-          {/* Cart Icon */}
-          <button 
-            onClick={handleCart}
-            className="p-2 hover:bg-slate-200 rounded-lg transition-colors relative"
-            aria-label="Shopping Cart"
-          >
-            <ShoppingCart size={20} className="text-slate-600" />
-          </button>
+             <ShoppingCart size={18} />
+          </NavLink>
+          {/* <User size={18} /> */}
 
           {isLoggedIn ? (
             <div className="hidden md:flex items-center gap-3">
