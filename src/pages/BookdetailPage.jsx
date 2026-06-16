@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 const colors = {
   primary: "#002629",
@@ -72,6 +72,13 @@ const RssIcon = ({ size = 18 }) => (
   </svg>
 );
 
+const BookOpenIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+  </svg>
+);
+
 const reviews = [
   {
     stars: 5,
@@ -103,6 +110,7 @@ export default function BookdetailPage() {
   const [activeNav, setActiveNav] = useState("Books");
   const [cartAdded, setCartAdded] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
+  const navigate = useNavigate();
 
   const { id } = useParams();
 
@@ -181,10 +189,10 @@ const metaItems = [
           </div>
 
           {/* Right: Details */}
-          <div className="lg:col-span-7" style={{ display: "flex", flexDirection: "column", gap: 24 }} className="md:gap-8">
+          <div className="lg:col-span-7 md:gap-8" style={{ display: "flex", flexDirection: "column", gap: 24 }}>
             {/* Title & Author */}
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }} className="md:gap-4">
-              <h1 className="font-headline" style={{ fontSize: 32, fontWeight: 800, color: colors.primary, letterSpacing: "-1px", lineHeight: 1.05, margin: 0 }} className="md:text-5xl lg:text-[52px] md:tracking-[-2px]">
+              <h1 className="font-headline md:text-5xl lg:text-[52px] md:tracking-[-2px]" style={{ fontSize: 32, fontWeight: 800, color: colors.primary, letterSpacing: "-1px", lineHeight: 1.05, margin: 0 }}>
                 {book.title}
               </h1>
               <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }} className="md:gap-4">
@@ -199,13 +207,13 @@ const metaItems = [
             </div>
 
             {/* Price */}
-            <div className="font-headline" style={{ fontSize: 32, fontWeight: 800, color: colors.primaryContainer }} className="md:text-[38px]">
+            <div className="font-headline md:text-[38px]" style={{ fontSize: 32, fontWeight: 800, color: colors.primaryContainer }}>
              ₹{book.price}
             </div>
 
             {/* Synopsis */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }} className="md:gap-3">
-              <h3 className="font-headline" style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: colors.onSurfaceVariant, margin: 0 }} className="md:text-[11px]">
+              <h3 className="font-headline md:text-[11px]" style={{ fontSize: 10, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: colors.onSurfaceVariant, margin: 0 }}>
                 Synopsis
               </h3>
               <p style={{ fontSize: 15, lineHeight: 1.75, color: `${colors.onSurface}cc`, maxWidth: 560, margin: 0 }} className="md:text-[17px]">
@@ -224,35 +232,50 @@ const metaItems = [
             </div>
 
             {/* Actions */}
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }} className="md:gap-4">
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", flexDirection: "column" }} className="md:gap-4 w-full">
               <button
                 className="book-gradient btn-scale font-headline"
-                onClick={handleCart}
+                onClick={() => navigate(`/books/${book._id}/chapters`)}
                 style={{
                   color: "white", padding: "14px 28px", borderRadius: 10, fontWeight: 700, fontSize: 14,
                   border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
-                  boxShadow: "0 8px 24px rgba(0,38,41,0.25)", transition: "box-shadow 0.2s", flex: 1,
-                  justifyContent: "center",
+                  boxShadow: "0 8px 24px rgba(0,38,41,0.25)", transition: "all 0.2s",
+                  justifyContent: "center", width: "100%"
                 }}
               >
-                <CartIcon size={18} />
-                <span className="hidden sm:inline">{cartAdded ? "Added!" : "Add to Cart"}</span>
-                <span className="sm:hidden">{cartAdded ? "Added!" : "Add"}</span>
+                <BookOpenIcon size={18} />
+                <span>Start Reading</span>
               </button>
-              <button
-                className="btn-scale font-headline"
-                onClick={() => setWishlisted(!wishlisted)}
-                style={{
-                  background: colors.surfaceContainerHighest, color: colors.primary,
-                  padding: "14px 28px", borderRadius: 10, fontWeight: 700, fontSize: 14,
-                  border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
-                  transition: "background 0.15s", flex: 1, justifyContent: "center",
-                }}
-              >
-                <HeartIcon size={18} />
-                <span className="hidden sm:inline">{wishlisted ? "Wishlisted ✓" : "Add to Wishlist"}</span>
-                <span className="sm:hidden">{wishlisted ? "Saved" : "Save"}</span>
-              </button>
+              <div style={{ display: "flex", gap: 12, width: "100%" }}>
+                <button
+                  className="book-gradient btn-scale font-headline"
+                  onClick={handleCart}
+                  style={{
+                    color: "white", padding: "14px 28px", borderRadius: 10, fontWeight: 700, fontSize: 14,
+                    border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
+                    boxShadow: "0 8px 24px rgba(0,38,41,0.25)", transition: "box-shadow 0.2s", flex: 1,
+                    justifyContent: "center",
+                  }}
+                >
+                  <CartIcon size={18} />
+                  <span className="hidden sm:inline">{cartAdded ? "Added!" : "Add to Cart"}</span>
+                  <span className="sm:hidden">{cartAdded ? "Added!" : "Add"}</span>
+                </button>
+                <button
+                  className="btn-scale font-headline"
+                  onClick={() => setWishlisted(!wishlisted)}
+                  style={{
+                    background: colors.surfaceContainerHighest, color: colors.primary,
+                    padding: "14px 28px", borderRadius: 10, fontWeight: 700, fontSize: 14,
+                    border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
+                    transition: "background 0.15s", flex: 1, justifyContent: "center",
+                  }}
+                >
+                  <HeartIcon size={18} />
+                  <span className="hidden sm:inline">{wishlisted ? "Wishlisted ✓" : "Add to Wishlist"}</span>
+                  <span className="sm:hidden">{wishlisted ? "Saved" : "Save"}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -261,58 +284,21 @@ const metaItems = [
         <section style={{ marginTop: 64 }} className="md:mt-24">
           <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 32 }} className="sm:flex-row sm:justify-between sm:items-end md:mb-12">
             <div>
-              <h2 className="font-headline" style={{ fontSize: 28, fontWeight: 800, color: colors.primary, margin: "0 0 6px 0" }} className="md:text-4xl">
+              <h2 className="font-headline md:text-4xl" style={{ fontSize: 28, fontWeight: 800, color: colors.primary, margin: "0 0 6px 0" }}>
                 Reader Reviews
               </h2>
               <p style={{ color: colors.onSurfaceVariant, margin: 0, fontSize: 14 }} className="md:text-base">Hear from our community of book lovers.</p>
             </div>
             <button
-              className="review-btn font-headline"
+              className="review-btn font-headline md:text-[15px] md:gap-2"
               style={{
                 background: "transparent", border: "none", cursor: "pointer", color: colors.primary,
                 fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", gap: 6,
               }}
-              className="md:text-[15px] md:gap-2"
             >
               Write a Review
               <span className="review-arrow"><ArrowRightIcon size={16} /></span>
             </button>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20 }} className="sm:grid-cols-2 lg:grid-cols-3 md:gap-7">
-            {reviews.map((r, i) => (
-              <div
-                key={i}
-                style={{
-                  background: colors.surfaceContainerLowest, padding: 24, borderRadius: 14,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: `1px solid ${colors.outlineVariant}20`,
-                  display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 16,
-                }}
-                className="md:p-8 md:gap-5"
-              >
-                <div>
-                  <div style={{ display: "flex", gap: 2, marginBottom: 12 }} className="md:mb-4">
-                    {[...Array(5)].map((_, s) => <StarIcon key={s} filled={s < r.stars} size={15} />)}
-                  </div>
-                  <p style={{ color: `${colors.onSurface}e8`, fontStyle: "italic", lineHeight: 1.7, margin: 0, fontSize: 14 }} className="md:text-base">
-                    "{r.text}"
-                  </p>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }} className="md:gap-3">
-                  <div style={{
-                    width: 36, height: 36, borderRadius: "50%",
-                    background: `${colors.primaryContainer}18`, color: colors.primary,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontWeight: 700, fontSize: 12,
-                  }}
-                    className="font-headline md:w-10 md:h-10 md:text-[13px]">{r.initials}</div>
-                  <div>
-                    <p style={{ fontWeight: 700, fontSize: 13, margin: 0 }} className="md:text-sm">{r.name}</p>
-                    <p style={{ fontSize: 11, color: colors.onSurfaceVariant, margin: 0 }} className="md:text-xs">{r.label}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </section>
       </main>

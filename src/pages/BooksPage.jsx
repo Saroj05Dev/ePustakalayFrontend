@@ -114,27 +114,47 @@ function BookCard({ book, isInWishlist, onWishlistToggle }) {
         <p className="text-xs md:text-sm mb-3 md:mb-4 truncate" style={{ color: colors.onSurfaceVariant }}>
           {book.author}
         </p>
-        <div className="mt-auto flex items-center justify-between">
-          <span
-            className="text-lg md:text-xl font-black"
-            style={{ fontFamily: "Manrope, sans-serif", color: colors.primary }}
-          >
+        <div className="mt-auto flex flex-col gap-2.5">
+          <div style={{ fontFamily: "Manrope, sans-serif", color: colors.primary }} className="text-lg md:text-xl font-black">
             {book.price}
-          </span>
-          <button
-            onClick={handleAdd}
-            className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-bold transition-all duration-200 active:scale-95"
-            style={{
-              background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryContainer})`,
-              color: colors.onPrimary,
-              opacity: added ? 0.8 : 1,
-            }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="md:w-4 md:h-4">
-              <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-2.2-5c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0 0 19.24 4H5.21L4.27 2H1v2h2l3.6 7.59L5.24 14c-.16.28-.24.61-.24.96C5 16.1 5.9 17 7 17h12v-2H7.42c-.13 0-.25-.11-.25-.25l.03-.12L8.1 13h6.7z"/>
-            </svg>
-            <span className="hidden sm:inline">{added ? "Added!" : "Add"}</span>
-          </button>
+          </div>
+          <div className="flex items-center gap-1.5 w-full">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/books/${book._id}/chapters`);
+              }}
+              className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all duration-200 active:scale-95"
+              style={{
+                background: colors.secondaryContainer,
+                color: colors.primary,
+                border: `1px solid ${colors.outlineVariant}30`
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+              </svg>
+              <span>Read</span>
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAdd();
+              }}
+              className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-bold transition-all duration-200 active:scale-95"
+              style={{
+                background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryContainer})`,
+                color: colors.onPrimary,
+                opacity: added ? 0.8 : 1,
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-2.2-5c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0 0 19.24 4H5.21L4.27 2H1v2h2l3.6 7.59L5.24 14c-.16.28-.24.61-.24.96C5 16.1 5.9 17 7 17h12v-2H7.42c-.13 0-.25-.11-.25-.25l.03-.12L8.1 13h6.7z"/>
+              </svg>
+              <span>{added ? "Added!" : "Add"}</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -15,6 +15,7 @@ import Layout from "./layout/Layout";
 import PublicLayout from "./layout/publicLayout";
 import BooksPage from "./pages/BooksPage";
 import BookdetailPage from "./pages/BookdetailPage";
+import ChapterPage from "./pages/chapter";
 import WishlistPage from "./pages/WishlistPage";
 import MyAccount from "./pages/MyAccount";
 import { getMe, setAuthCheckComplete } from "./redux/slices/authSlice";
@@ -53,6 +54,12 @@ function App() {
         <Route path="/books/:id"
          element={
          <PublicLayout><BookdetailPage /></PublicLayout>
+         } 
+         />
+
+        <Route path="/books/:id/chapters"
+         element={
+          <ChapterPage />
          } 
          />
 
