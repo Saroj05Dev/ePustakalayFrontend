@@ -15,6 +15,11 @@ export default function Navbar() {
     (state) => state.auth
   );
 
+  const cartItems = useSelector(
+    (state) => state.cart?.cartData || []
+  );
+  const cartCount = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
+
   const [localSearch, setLocalSearch] = useState("");
   const [showMobileSearch, setShowMobileSearch] = useState(false);
 
@@ -76,8 +81,49 @@ export default function Navbar() {
 
             <div className="hidden lg:flex gap-8 items-center text-base">
 
-              <NavLink to="/" className={linkStyles}>
-                Home
+        <div className="flex items-center gap-3 md:gap-6 py-5">
+          {/* Desktop Search */}
+          <div className="hidden lg:flex items-center bg-slate-200/50 rounded-lg px-3 py-2 w-64">
+            <Search size={16} className="text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search the collection..."
+              value={localSearch}
+              onChange={handleSearchChange}
+              className="bg-transparent outline-none ml-2 text-sm w-full"
+            />
+          </div>
+          <NavLink 
+            to="/carts"
+            aria-label="View shopping cart"
+            className="relative p-1"
+          >
+             <ShoppingCart size={18} />
+             {cartCount > 0 && (
+               <span 
+                 className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full flex items-center justify-center font-extrabold"
+                 style={{
+                   fontSize: "9px",
+                   minWidth: "15px",
+                   height: "15px",
+                   padding: "0 3px",
+                   lineHeight: 1,
+                   border: "1.5px solid white"
+                 }}
+               >
+                 {cartCount}
+               </span>
+             )}
+          </NavLink>
+          {/* <User size={18} /> */}
+
+          {isLoggedIn ? (
+            <div className="hidden md:flex items-center gap-3">
+              <NavLink
+                to="/my-account"
+                className="px-4 py-2 border rounded-md text-[#002629] border-[#002629] hover:bg-slate-100 font-semibold transition-all duration-200"
+              >
+                My Account
               </NavLink>
               <NavLink to="/books" className={linkStyles}>
                 Books
