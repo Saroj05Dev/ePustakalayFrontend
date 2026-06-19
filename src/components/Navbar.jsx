@@ -52,40 +52,34 @@ export default function Navbar() {
     alert("Cart feature coming soon!");
   };
 
-  const linkStyles = ({ isActive }) => 
-    `transition-all duration-200 relative pb-1 ${
-      isActive 
-        ? "text-[#002629] after:w-full"
-        : "text-slate-500 hover:text-[#002629] after:w-0"
+
+  const cartItems = useSelector(
+    (state) => state.cart.cartData || []
+  );
+
+  const cartCount = cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
+
+
+  const linkStyles = ({ isActive }) =>
+    `transition-all duration-200 relative pb-1 ${isActive
+      ? "text-[#002629] after:w-full"
+      : "text-slate-500 hover:text-[#002629] after:w-0"
     } after:content-[""] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-[#002629] after:transition-all after:duration-200`;
 
   return (
     <>
-    <header className="fixed top-0 left-0 right-0 z-50 bg-slate-50/80 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-      <nav className="flex justify-between items-center px-4 md:px-8 py-4 max-w-350 mx-auto h-16">
-        <div className="flex items-center gap-6 md:gap-12">
-          <NavLink to="/" className="flex items-center">
-            <img 
-              src={logo} 
-              alt="ePustakalay Logo" 
-              className="h-10 md:h-12 w-auto object-contain"
-            />
-          </NavLink>
-
-          <div className="hidden lg:flex gap-8 items-center text-base">
-            
-          <NavLink to="/" className={linkStyles}>
-               Home
-            </NavLink>
-            <NavLink to="/books" className={linkStyles}>
-              Books
-            </NavLink>
-            <NavLink to="/wishlist" className={linkStyles}> {/* Added proper /wishlist path */}
-              Wishlist
+      <header className="fixed top-0 left-0 right-0 z-50 bg-slate-50/80 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        <nav className="flex justify-between items-center px-4 md:px-8 py-4 max-w-350 mx-auto h-16">
+          <div className="flex items-center gap-6 md:gap-12">
+            <NavLink to="/" className="flex items-center">
+              <img
+                src={logo}
+                alt="ePustakalay Logo"
+                className="h-10 md:h-12 w-auto object-contain"
+              />
             </NavLink>
 
-          </div>
-        </div>
+            <div className="hidden lg:flex gap-8 items-center text-base">
 
         <div className="flex items-center gap-3 md:gap-6 py-5">
           {/* Desktop Search */}
@@ -131,60 +125,110 @@ export default function Navbar() {
               >
                 My Account
               </NavLink>
-              <button  
-              onClick={handleLogout}
-              className="px-4 py-2 bg-[#002629] text-white rounded-md font-semibold transition-all duration-200"
-              >
-                Logout
-              </button>
+              <NavLink to="/books" className={linkStyles}>
+                Books
+              </NavLink>
+              <NavLink to="/wishlist" className={linkStyles}> {/* Added proper /wishlist path */}
+                Wishlist
+              </NavLink>
+
             </div>
-          ) : (
-            <NavLink to="/login" 
-             className="px-4 py-2 border rounded-md font-semibold text-[#002629] border-[#002629] hover:bg-slate-100 transition-all duration-200"
-            >
-              Login
-            </NavLink>
-          )}
+          </div>
 
-        </div>
-      </nav>
-    </header>
-
-    {/* Mobile Search Overlay */}
-    {showMobileSearch && (
-      <div 
-        className="fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-sm lg:hidden"
-        onClick={() => setShowMobileSearch(false)}
-      >
-        <div 
-          className="bg-white p-4 shadow-lg animate-slideDown"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-center gap-3 max-w-2xl mx-auto">
-            <div className="flex-1 flex items-center bg-slate-100 rounded-lg px-4 py-3">
-              <Search size={18} className="text-gray-400 flex-shrink-0" />
+          <div className="flex items-center gap-3 md:gap-6 py-5">
+            {/* Desktop Search */}
+            <div className="hidden lg:flex items-center bg-slate-200/50 rounded-lg px-3 py-2 w-64">
+              <Search size={16} className="text-gray-400" />
               <input
                 type="text"
-                placeholder="Search books, authors, categories..."
+                placeholder="Search the collection..."
                 value={localSearch}
                 onChange={handleSearchChange}
-                autoFocus
-                className="bg-transparent outline-none ml-3 text-sm w-full text-slate-800 placeholder:text-slate-400"
+                className="bg-transparent outline-none ml-2 text-sm w-full"
               />
             </div>
-            <button
-              onClick={() => setShowMobileSearch(false)}
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-              aria-label="Close search"
+            <NavLink
+              to="/carts"
+              aria-label="View shopping cart"
             >
-              <X size={24} className="text-slate-600" />
-            </button>
+
+              <div className="relative inline-flex items-center justify-center">
+
+                <ShoppingCart size={18} />
+
+                {cartCount > 0 && (
+                  /* 2. Styled with absolute positioning, small sizes, and black circle classes */
+                  <span className="absolute -top-1.5 -right-2 bg-black text-white text-[9px] font-bold w-3.5 height-3.5 h-3.5 flex items-center justify-center rounded-full ring-1 ring-white">
+                    {cartCount}
+                  </span>
+                )}
+
+              </div>
+            </NavLink>
+            {/* <User size={18} /> */}
+
+            {isLoggedIn ? (
+              <div className="hidden md:flex items-center gap-3">
+                <NavLink
+                  to="/my-account"
+                  className="px-4 py-2 border rounded-md text-[#002629] border-[#002629] hover:bg-slate-100 font-semibold transition-all duration-200"
+                >
+                  My Account
+                </NavLink>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 bg-[#002629] text-white rounded-md font-semibold transition-all duration-200"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <NavLink to="/login"
+                className="px-4 py-2 border rounded-md font-semibold text-[#002629] border-[#002629] hover:bg-slate-100 transition-all duration-200"
+              >
+                Login
+              </NavLink>
+            )}
+
+          </div>
+        </nav>
+      </header>
+
+      {/* Mobile Search Overlay */}
+      {showMobileSearch && (
+        <div
+          className="fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-sm lg:hidden"
+          onClick={() => setShowMobileSearch(false)}
+        >
+          <div
+            className="bg-white p-4 shadow-lg animate-slideDown"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 max-w-2xl mx-auto">
+              <div className="flex-1 flex items-center bg-slate-100 rounded-lg px-4 py-3">
+                <Search size={18} className="text-gray-400 flex-shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Search books, authors, categories..."
+                  value={localSearch}
+                  onChange={handleSearchChange}
+                  autoFocus
+                  className="bg-transparent outline-none ml-3 text-sm w-full text-slate-800 placeholder:text-slate-400"
+                />
+              </div>
+              <button
+                onClick={() => setShowMobileSearch(false)}
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                aria-label="Close search"
+              >
+                <X size={24} className="text-slate-600" />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
 
-    <style jsx>{`
+      <style jsx>{`
       @keyframes slideDown {
         from {
           transform: translateY(-100%);
