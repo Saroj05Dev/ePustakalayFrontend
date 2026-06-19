@@ -1,39 +1,31 @@
 import { useState, useEffect } from "react";
-import { Search, ShoppingCart, User, X } from "lucide-react";
+import { Search, ShoppingCart, X } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { logout } from "../redux/slices/authSlice";
 import logo from "../assets/ePustakalayNewLogo.png";
-
 
 export default function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { isLoggedIn, data } = useSelector(
-    (state) => state.auth
-  );
-
-  const cartItems = useSelector(
-    (state) => state.cart?.cartData || []
-  );
+  const { isLoggedIn } = useSelector((state) => state.auth);
+  const cartItems = useSelector((state) => state.cart?.cartData || []);
   const cartCount = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
 
   const [localSearch, setLocalSearch] = useState("");
   const [showMobileSearch, setShowMobileSearch] = useState(false);
 
-  // Sync local search input with URL search param
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const urlSearch = queryParams.get("search") || "";
     setLocalSearch(urlSearch);
-  }, [location.pathname, location.search]);
+  }, [location.search]);
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setLocalSearch(value);
-
     const newParams = new URLSearchParams(location.search);
     if (value) {
       newParams.set("search", value);
@@ -47,95 +39,41 @@ export default function Navbar() {
     dispatch(logout());
   };
 
-  const handleCart = () => {
-    // Cart functionality placeholder
-    alert("Cart feature coming soon!");
-  };
-
-
-  const cartItems = useSelector(
-    (state) => state.cart.cartData || []
-  );
-
-  const cartCount = cartItems.reduce((total, item) => total + (item.quantity || 1), 0);
-
-
   const linkStyles = ({ isActive }) =>
-    `transition-all duration-200 relative pb-1 ${isActive
-      ? "text-[#002629] after:w-full"
-      : "text-slate-500 hover:text-[#002629] after:w-0"
-    } after:content-[""] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-[#002629] after:transition-all after:duration-200`;
+    `transition-all duration-200 relative pb-1 ${
+      isActive
+        ? "text-[#002629] after:w-full"
+        : "text-slate-500 hover:text-[#002629] after:w-0"
+    } after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-[#002629] after:transition-all after:duration-200`;
 
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-slate-50/80 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-        <nav className="flex justify-between items-center px-4 md:px-8 py-4 max-w-350 mx-auto h-16">
-          <div className="flex items-center gap-6 md:gap-12">
-            <NavLink to="/" className="flex items-center">
-              <img
-                src={logo}
-                alt="ePustakalay Logo"
-                className="h-10 md:h-12 w-auto object-contain"
-              />
-            </NavLink>
-
-            <div className="hidden lg:flex gap-8 items-center text-base">
-
-        <div className="flex items-center gap-3 md:gap-6 py-5">
-          {/* Desktop Search */}
-          <div className="hidden lg:flex items-center bg-slate-200/50 rounded-lg px-3 py-2 w-64">
-            <Search size={16} className="text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search the collection..."
-              value={localSearch}
-              onChange={handleSearchChange}
-              className="bg-transparent outline-none ml-2 text-sm w-full"
+        <nav className="flex justify-between items-center px-4 md:px-8 py-4 max-w-7xl mx-auto h-16">
+          {/* Logo */}
+          <NavLink to="/" className="flex items-center">
+            <img
+              src={logo}
+              alt="ePustakalay Logo"
+              className="h-10 md:h-12 w-auto object-contain"
             />
-          </div>
-          <NavLink 
-            to="/carts"
-            aria-label="View shopping cart"
-            className="relative p-1"
-          >
-             <ShoppingCart size={18} />
-             {cartCount > 0 && (
-               <span 
-                 className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full flex items-center justify-center font-extrabold"
-                 style={{
-                   fontSize: "9px",
-                   minWidth: "15px",
-                   height: "15px",
-                   padding: "0 3px",
-                   lineHeight: 1,
-                   border: "1.5px solid white"
-                 }}
-               >
-                 {cartCount}
-               </span>
-             )}
           </NavLink>
-          {/* <User size={18} /> */}
 
-          {isLoggedIn ? (
-            <div className="hidden md:flex items-center gap-3">
-              <NavLink
-                to="/my-account"
-                className="px-4 py-2 border rounded-md text-[#002629] border-[#002629] hover:bg-slate-100 font-semibold transition-all duration-200"
-              >
-                My Account
-              </NavLink>
-              <NavLink to="/books" className={linkStyles}>
-                Books
-              </NavLink>
-              <NavLink to="/wishlist" className={linkStyles}> {/* Added proper /wishlist path */}
-                Wishlist
-              </NavLink>
-
-            </div>
+          {/* Desktop Navigation Links */}
+          <div className="hidden lg:flex items-center gap-8 text-base">
+            <NavLink to="/" className={linkStyles}>
+              Home
+            </NavLink>
+            <NavLink to="/books" className={linkStyles}>
+              Books
+            </NavLink>
+            <NavLink to="/wishlist" className={linkStyles}>
+              Wishlist
+            </NavLink>
           </div>
 
-          <div className="flex items-center gap-3 md:gap-6 py-5">
+          {/* Right Side: Search + Cart + Auth */}
+          <div className="flex items-center gap-4 md:gap-6">
             {/* Desktop Search */}
             <div className="hidden lg:flex items-center bg-slate-200/50 rounded-lg px-3 py-2 w-64">
               <Search size={16} className="text-gray-400" />
@@ -147,49 +85,50 @@ export default function Navbar() {
                 className="bg-transparent outline-none ml-2 text-sm w-full"
               />
             </div>
-            <NavLink
-              to="/carts"
-              aria-label="View shopping cart"
+
+            {/* Mobile Search Toggle */}
+            <button
+              className="lg:hidden p-2"
+              onClick={() => setShowMobileSearch(true)}
+              aria-label="Open search"
             >
+              <Search size={20} />
+            </button>
 
-              <div className="relative inline-flex items-center justify-center">
-
-                <ShoppingCart size={18} />
-
-                {cartCount > 0 && (
-                  /* 2. Styled with absolute positioning, small sizes, and black circle classes */
-                  <span className="absolute -top-1.5 -right-2 bg-black text-white text-[9px] font-bold w-3.5 height-3.5 h-3.5 flex items-center justify-center rounded-full ring-1 ring-white">
-                    {cartCount}
-                  </span>
-                )}
-
-              </div>
+            {/* Cart */}
+            <NavLink to="/carts" aria-label="View shopping cart" className="relative p-1">
+              <ShoppingCart size={20} />
+              {cartCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full ring-2 ring-white">
+                  {cartCount}
+                </span>
+              )}
             </NavLink>
-            {/* <User size={18} /> */}
 
+            {/* Auth Buttons */}
             {isLoggedIn ? (
               <div className="hidden md:flex items-center gap-3">
                 <NavLink
                   to="/my-account"
-                  className="px-4 py-2 border rounded-md text-[#002629] border-[#002629] hover:bg-slate-100 font-semibold transition-all duration-200"
+                  className="px-4 py-2 border rounded-md text-[#002629] border-[#002629] hover:bg-slate-100 font-semibold transition-all"
                 >
                   My Account
                 </NavLink>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 bg-[#002629] text-white rounded-md font-semibold transition-all duration-200"
+                  className="px-4 py-2 bg-[#002629] text-white rounded-md font-semibold transition-all"
                 >
                   Logout
                 </button>
               </div>
             ) : (
-              <NavLink to="/login"
-                className="px-4 py-2 border rounded-md font-semibold text-[#002629] border-[#002629] hover:bg-slate-100 transition-all duration-200"
+              <NavLink
+                to="/login"
+                className="px-4 py-2 border rounded-md font-semibold text-[#002629] border-[#002629] hover:bg-slate-100 transition-all"
               >
                 Login
               </NavLink>
             )}
-
           </div>
         </nav>
       </header>
@@ -228,21 +167,21 @@ export default function Navbar() {
         </div>
       )}
 
-      <style jsx>{`
-      @keyframes slideDown {
-        from {
-          transform: translateY(-100%);
-          opacity: 0;
+      <style>{`
+        @keyframes slideDown {
+          from {
+            transform: translateY(-100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
         }
-        to {
-          transform: translateY(0);
-          opacity: 1;
+        .animate-slideDown {
+          animation: slideDown 0.3s ease-out;
         }
-      }
-      .animate-slideDown {
-        animation: slideDown 0.3s ease-out;
-      }
-    `}</style>
+      `}</style>
     </>
   );
 }
