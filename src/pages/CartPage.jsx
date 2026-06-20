@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { getCart, updateCartItem, removeCartItem, setGuestCart, updateGuestCartQty, removeFromGuestCart, addToGuestCart } from "../redux/slices/cartSlice";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 // ─── Color tokens matching the ePustakalay design system ───────────────────
 const colors = {
@@ -238,6 +239,8 @@ function OrderSummary({ subtotal, cartCount, promoCode, setPromoCode, onApplyPro
   const tax = +(subtotal * 0.05).toFixed(2);
   const total = subtotal + shipping + tax - discount;
 
+  const navigate = useNavigate();
+
   return (
     <aside className="w-full lg:w-96">
       <div
@@ -320,7 +323,7 @@ function OrderSummary({ subtotal, cartCount, promoCode, setPromoCode, onApplyPro
 
         {/* CTA */}
         <button
-          onClick={onCheckout}
+          onClick={() => navigate("/checkout")}
           disabled={cartCount === 0}
           className="w-full py-4 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed group"
           style={{

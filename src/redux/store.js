@@ -3,10 +3,10 @@ import AuthSliceReducer from "./slices/authSlice";
 import CategorySliceReducer from "./slices/categorySlice";
 import BookSliceReducer from "./slices/bookSlice";
 import ChapterSliceReducer from "./slices/chapterSlice";
-import OrderSliceReducer from "./slices/orderSlice";
 import WishlistSliceReducer from "./slices/wishlistSlice";
 import CartSliceReducer from "./slices/cartSlice";
 import NotesSliceReducer from "./slices/notesSlice";
+import OrderSliceReducer from "./slices/orderSlice";
 
 export const store = configureStore({
     reducer: {
