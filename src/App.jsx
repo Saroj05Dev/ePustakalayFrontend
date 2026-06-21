@@ -22,6 +22,8 @@ import MyAccount from "./pages/MyAccount";
 import { getMe, setAuthCheckComplete } from "./redux/slices/authSlice";
 import ChapterPage from "./pages/ChapterPage";
 import Notes from "./pages/Notes";
+import CheckoutPage from "./pages/CheckoutPage";
+import OrderSuccessPage from "./pages/OrderSuccessPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -59,18 +61,40 @@ function App() {
   return (
     <>
       <Routes>
-        <Route 
-        path="/" 
-        element={
-        <PublicLayout><HomePage /></PublicLayout>
-        } 
+        <Route
+          path="/"
+          element={
+            <PublicLayout>
+              <HomePage />
+            </PublicLayout>
+          }
         />
 
-        <Route 
-        path="/books" 
-        element={
-        <PublicLayout><BooksPage /></PublicLayout>
-        }
+        <Route
+          path="/books"
+          element={
+            <PublicLayout>
+              <BooksPage />
+            </PublicLayout>
+          }
+        />
+
+        <Route
+          path="/books/:id"
+          element={
+            <PublicLayout>
+              <BookdetailPage />
+            </PublicLayout>
+          }
+        />
+
+        <Route
+          path="/books/:id/chapters"
+          element={
+            <PublicLayout>
+              <ChapterPage />
+            </PublicLayout>
+          }
         />
         
         <Route path="/books/:id"
@@ -109,12 +133,18 @@ function App() {
         }
          />
 
-        <Route 
-        path="/signup" 
-        element={
-        <SignupPage />
-        } 
+        <Route
+          path="/carts"
+          element={
+            <PublicLayout>
+              <CartPage />
+            </PublicLayout>
+          }
         />
+
+        <Route path="/login" element={<LoginPage />} />
+
+        <Route path="/signup" element={<SignupPage />} />
 
         <Route
           path="/admin"
@@ -149,7 +179,7 @@ function App() {
           }
         />
 
-        <Route 
+        <Route
           path="/wishlist"
           element={
             <ProtectedRoute allowedRoles={["user", "admin"]}>
@@ -160,7 +190,7 @@ function App() {
           }
         />
 
-        <Route 
+        <Route
           path="/my-account"
           element={
             <ProtectedRoute allowedRoles={["user", "admin", "seller"]}>
@@ -170,8 +200,25 @@ function App() {
             </ProtectedRoute>
           }
         />
-      </Routes>
 
+        <Route
+          path="/checkout"
+          element={
+            <PublicLayout>
+              <CheckoutPage />
+            </PublicLayout>
+          }
+        />
+
+        <Route
+          path="/order-success"
+          element={
+            <PublicLayout>
+              <OrderSuccessPage />
+            </PublicLayout>
+          }
+        />
+      </Routes>
       <Toaster position="top-right" reverseOrder={false} />
     </>
   );
