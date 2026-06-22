@@ -7,6 +7,9 @@ import WishlistSliceReducer from "./slices/wishlistSlice";
 import CartSliceReducer from "./slices/cartSlice";
 import NotesSliceReducer from "./slices/notesSlice";
 import OrderSliceReducer from "./slices/orderSlice";
+import BookmarkSliceReducer from "./slices/bookmarkSlice";
+import ProgressSliceReducer from "./slices/progressSlice";
+import HighlightSliceReducer from "./slices/highlightSlice";
 
 export const store = configureStore({
     reducer: {
@@ -18,6 +21,9 @@ export const store = configureStore({
         wishlist: WishlistSliceReducer,
         cart: CartSliceReducer,
         notes: NotesSliceReducer,
+        bookmarks: BookmarkSliceReducer,
+        progress: ProgressSliceReducer,
+        highlights: HighlightSliceReducer,
     },
     devTools: true,
     middleware: (getDefaultMiddleware) =>
