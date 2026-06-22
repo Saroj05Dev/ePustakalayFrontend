@@ -10,6 +10,25 @@ import {
   deleteNote,
   clearNotes,
 } from "../redux/slices/notesSlice";
+import {
+  getBookmarkByBook,
+  getAllBookmarks,
+  createBookmark,
+  deleteBookmark,
+  clearCurrentBookmark,
+} from "../redux/slices/bookmarkSlice";
+import {
+  getBookProgress,
+  createReadingProgress,
+  updateReadingProgress,
+  clearCurrentProgress,
+} from "../redux/slices/progressSlice";
+import {
+  getHighlightsByChapter,
+  createHighlight,
+  deleteHighlight,
+  clearHighlights,
+} from "../redux/slices/highlightSlice";
 
 // ─── Color tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -84,6 +103,28 @@ const ChevronRightIcon = ({ size = 18 }) => (
 const MenuIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+);
+const BookmarkIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+  </svg>
+);
+const BookmarkFilledIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+  </svg>
+);
+const ListIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+    <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+  </svg>
+);
+const ExternalLinkIcon = ({ size = 14 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+    <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
   </svg>
 );
 
@@ -553,18 +594,22 @@ function NoteCard({ note, index, onDelete, chapterContent }) {
   );
 }
 
-function HighlightCard({ highlight, index }) {
+function HighlightCard({ highlight, index, onDelete }) {
+  const [hover, setHover] = useState(false);
   const col = HIGHLIGHT_COLORS.find((c) => c.id === highlight.color) || HIGHLIGHT_COLORS[0];
   return (
     <div
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
       style={{
         background: col.bg,
         borderRadius: 10,
         padding: "11px 14px",
-        border: `1.5px solid ${col.border}`,
+        border: `1.5px solid ${hover ? col.border : col.border + "80"}`,
         animation: "fadeInUp 0.3s ease both",
         animationDelay: `${index * 0.04}s`,
         position: "relative",
+        transition: "all 0.22s ease",
       }}
     >
       <div style={{
@@ -573,12 +618,29 @@ function HighlightCard({ highlight, index }) {
         background: col.border,
       }} />
       <p style={{
-        margin: 0, fontSize: 13, lineHeight: 1.6,
+        margin: "0 0 8px", fontSize: 13, lineHeight: 1.6,
         color: col.text, fontStyle: "italic",
         fontFamily: "'Inter',sans-serif", paddingLeft: 10,
       }}>
         "{highlight.text}"
       </p>
+
+      <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+        <button
+          onClick={() => onDelete && onDelete(highlight._id)}
+          title="Delete highlight"
+          style={{
+            background: "transparent", border: "none",
+            color: hover ? "#e05a5a" : C.outline,
+            cursor: "pointer", padding: "3px 6px",
+            borderRadius: 6, transition: "color 0.18s",
+            display: "flex", alignItems: "center", gap: 3,
+            fontSize: 11, fontFamily: "'Manrope',sans-serif",
+          }}
+        >
+          <TrashIcon size={12} /> Delete
+        </button>
+      </div>
     </div>
   );
 }
@@ -590,6 +652,7 @@ function StudyGuidePanel({
   highlights,
   onAddNote,
   onDeleteNote,
+  onDeleteHighlight,
   notes,
   isLoading,
   onClose,
@@ -747,10 +810,10 @@ function StudyGuidePanel({
             <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
               {highlights.map((hl, i) => (
                 <HighlightCard
-                  key={i}
+                  key={hl._id || i}
                   highlight={hl}
                   index={i}
-                  onRemove={(text, color) => onRemoveHighlight && onRemoveHighlight(text, color)}
+                  onDelete={onDeleteHighlight}
                 />
               ))}
             </div>
@@ -906,6 +969,7 @@ function ChapterContent({ chapter, highlights, onTextSelect, onHighlightClick, a
       {paragraphs.map((para, i) => (
         <p
           key={i}
+          className="book-text-paragraph"
           style={{
             fontFamily: "'Georgia',serif",
             fontSize: "clamp(15px,1.6vw,17px)",
@@ -942,6 +1006,279 @@ function ChapterContent({ chapter, highlights, onTextSelect, onHighlightClick, a
   );
 }
 
+// ─── Bookmarks Modal ──────────────────────────────────────────────────────────
+function BookmarksModal({ onClose, onNavigate, onDelete, bookmarks, isLoading }) {
+  // Group bookmarks by book
+  const grouped = bookmarks.reduce((acc, bm) => {
+    const bookId = bm.book?._id || bm.book;
+    if (!acc[bookId]) {
+      acc[bookId] = {
+        book: bm.book,
+        bookmarks: [],
+      };
+    }
+    acc[bookId].bookmarks.push(bm);
+    return acc;
+  }, {});
+  const groups = Object.values(grouped);
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 9000,
+        background: "rgba(0,0,0,0.55)",
+        backdropFilter: "blur(6px)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "16px",
+        animation: "fadeInUp 0.2s ease",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "#ffffff",
+          borderRadius: 20,
+          width: "100%", maxWidth: 560,
+          maxHeight: "82vh",
+          display: "flex", flexDirection: "column",
+          boxShadow: "0 24px 64px rgba(0,38,41,0.28), 0 4px 16px rgba(0,38,41,0.1)",
+          overflow: "hidden",
+          fontFamily: "'Inter',sans-serif",
+        }}
+      >
+        {/* Modal Header */}
+        <div style={{
+          background: `linear-gradient(135deg, ${C.primary} 0%, ${C.primaryMid} 100%)`,
+          padding: "18px 20px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          flexShrink: 0,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: "50%",
+              background: "rgba(255,255,255,0.15)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              color: "#fff",
+            }}>
+              <BookmarkFilledIcon size={18} />
+            </div>
+            <div>
+              <p style={{ margin: 0, color: "#fff", fontFamily: "'Manrope',sans-serif", fontWeight: 800, fontSize: 16 }}>
+                My Bookmarks
+              </p>
+              <p style={{ margin: 0, color: "rgba(255,255,255,0.65)", fontSize: 12, fontFamily: "'Manrope',sans-serif" }}>
+                {bookmarks.length} bookmark{bookmarks.length !== 1 ? "s" : ""} across {groups.length} book{groups.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: "rgba(255,255,255,0.12)", border: "none",
+              color: "rgba(255,255,255,0.8)", cursor: "pointer",
+              borderRadius: 8, padding: "7px 8px",
+              display: "flex", alignItems: "center",
+              transition: "background 0.15s",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.24)"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.12)"}
+          >
+            <CloseIcon size={16} />
+          </button>
+        </div>
+
+        {/* Modal Body */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
+          {isLoading ? (
+            <div style={{ textAlign: "center", padding: "40px 0" }}>
+              <div style={{
+                width: 32, height: 32, border: `3px solid ${C.accent}`,
+                borderTopColor: "transparent", borderRadius: "50%",
+                margin: "0 auto 12px", animation: "spin 0.8s linear infinite",
+              }} />
+              <p style={{ color: C.onVariant, fontFamily: "'Manrope',sans-serif", fontSize: 14 }}>Loading bookmarks…</p>
+            </div>
+          ) : groups.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "40px 20px" }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: "50%",
+                background: `${C.accent}14`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                margin: "0 auto 16px", color: C.accent,
+              }}>
+                <BookmarkIcon size={28} />
+              </div>
+              <p style={{ fontFamily: "'Manrope',sans-serif", fontWeight: 800, fontSize: 16, color: C.primary, margin: "0 0 6px" }}>
+                No bookmarks yet
+              </p>
+              <p style={{ fontSize: 13, color: C.outline, margin: 0 }}>
+                Click the bookmark icon while reading to save your place
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              {groups.map((group) => {
+                const book = group.book;
+                const bookTitle = book?.title || book?.name || "Unknown Book";
+                const bookCover = book?.cover_image || book?.coverImage || null;
+                return (
+                  <div key={book?._id || Math.random()}
+                    style={{
+                      border: `1.5px solid ${C.outlineVariant}`,
+                      borderRadius: 14,
+                      overflow: "hidden",
+                      background: "#fafbf6",
+                    }}
+                  >
+                    {/* Book header row */}
+                    <div style={{
+                      background: C.accentLight,
+                      borderBottom: `1px solid ${C.outlineVariant}`,
+                      padding: "12px 14px",
+                      display: "flex", alignItems: "center", gap: 12,
+                    }}>
+                      {bookCover ? (
+                        <img
+                          src={bookCover}
+                          alt={bookTitle}
+                          style={{ width: 36, height: 48, objectFit: "cover", borderRadius: 5, flexShrink: 0, boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: 36, height: 48, borderRadius: 5,
+                          background: `linear-gradient(135deg, ${C.accent}, ${C.primaryMid})`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          color: "#fff", flexShrink: 0,
+                        }}>
+                          <BookOpenIcon size={18} />
+                        </div>
+                      )}
+                      <div style={{ minWidth: 0 }}>
+                        <p style={{
+                          margin: 0, fontFamily: "'Manrope',sans-serif",
+                          fontWeight: 800, fontSize: 14, color: C.primary,
+                          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                        }}>{bookTitle}</p>
+                        <p style={{
+                          margin: 0, fontSize: 11, color: C.outline,
+                          fontFamily: "'Manrope',sans-serif",
+                        }}>
+                          {group.bookmarks.length} bookmarked chapter{group.bookmarks.length !== 1 ? "s" : ""}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Bookmarks list */}
+                    <div style={{ padding: "8px 14px 12px" }}>
+                      {group.bookmarks.map((bm, i) => {
+                        const chapterTitle = bm.chapter?.chapter_title || bm.chapter_title || `Chapter ${bm.chapter?.chapter_number || bm.chapter_number || ""}`;
+                        const chapterId = bm.chapter?._id || bm.chapter;
+                        const bookId = book?._id;
+                        const savedDate = bm.created_at || bm.createdAt;
+                        return (
+                          <div
+                            key={bm._id || i}
+                            style={{
+                              display: "flex", alignItems: "center", justifyContent: "space-between",
+                              padding: "10px 0",
+                              borderBottom: i < group.bookmarks.length - 1 ? `1px solid ${C.outlineVariant}` : "none",
+                              gap: 10,
+                            }}
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                              <div style={{
+                                width: 8, height: 8, borderRadius: "50%",
+                                background: C.accent, flexShrink: 0,
+                              }} />
+                              <div style={{ minWidth: 0 }}>
+                                <p style={{
+                                  margin: 0, fontSize: 13.5, fontWeight: 600,
+                                  color: C.onSurface, fontFamily: "'Manrope',sans-serif",
+                                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                                }}>{chapterTitle}</p>
+                                {savedDate && (
+                                  <p style={{ margin: 0, fontSize: 11, color: C.outline }}>
+                                    Saved {new Date(savedDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                              <button
+                                onClick={() => { onNavigate(bookId, chapterId); onClose(); }}
+                                title="Go to bookmarked chapter"
+                                style={{
+                                  background: `linear-gradient(135deg, ${C.accent} 0%, ${C.primaryMid} 100%)`,
+                                  color: "#fff", border: "none", borderRadius: 8,
+                                  padding: "6px 11px", cursor: "pointer",
+                                  fontWeight: 700, fontSize: 12,
+                                  fontFamily: "'Manrope',sans-serif",
+                                  display: "flex", alignItems: "center", gap: 4,
+                                  boxShadow: "0 3px 10px rgba(26,107,112,0.28)",
+                                  transition: "opacity 0.15s",
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.opacity = "0.85"}
+                                onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+                              >
+                                <ExternalLinkIcon size={12} /> Go
+                              </button>
+                              <button
+                                onClick={() => onDelete(bm._id)}
+                                title="Remove bookmark"
+                                style={{
+                                  background: "#fff0f0", color: "#e05a5a",
+                                  border: "1.5px solid #f0c0c0", borderRadius: 8,
+                                  padding: "6px 8px", cursor: "pointer",
+                                  display: "flex", alignItems: "center",
+                                  transition: "background 0.15s",
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = "#ffe0e0"}
+                                onMouseLeave={(e) => e.currentTarget.style.background = "#fff0f0"}
+                              >
+                                <TrashIcon size={13} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Modal Footer */}
+        <div style={{
+          padding: "12px 20px",
+          borderTop: `1px solid ${C.outlineVariant}`,
+          background: "#f8fafa",
+          flexShrink: 0,
+          display: "flex", justifyContent: "flex-end",
+        }}>
+          <button
+            onClick={onClose}
+            style={{
+              background: C.primary, color: "#fff",
+              border: "none", borderRadius: 10,
+              padding: "9px 22px", cursor: "pointer",
+              fontWeight: 700, fontSize: 13,
+              fontFamily: "'Manrope',sans-serif",
+              transition: "opacity 0.15s",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = "0.85"}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Notes Page ───────────────────────────────────────────────────────────
 export default function Notes() {
   const dispatch  = useDispatch();
@@ -952,6 +1289,15 @@ export default function Notes() {
   const books      = useSelector((s) => s.books?.booksData || []);
   const notes      = useSelector((s) => s.notes?.notesData || []);
   const isLoading  = useSelector((s) => s.notes?.isLoading);
+  const currentBookmark = useSelector((s) => s.bookmarks?.currentBookmark || null);
+  const allBookmarksData = useSelector((s) => s.bookmarks?.bookmarksData || []);
+  const isBookmarksLoading = useSelector((s) => s.bookmarks?.isLoading || false);
+  const currentProgress = useSelector((s) => s.progress?.currentProgress || null);
+  const isProgressLoading = useSelector((s) => s.progress?.isLoading || false);
+  const hasFetchedProgress = useSelector((s) => s.progress?.hasFetched || false);
+
+  // Bookmarks modal state
+  const [showBookmarksModal, setShowBookmarksModal] = useState(false);
 
   const book    = books.find((b) => b._id === id);
   const chapter = chapters.find((c) => c._id === chapterId) || null;
@@ -961,13 +1307,12 @@ export default function Notes() {
   const prevChapter  = chapters[chapterIdx - 1] || null;
   const nextChapter  = chapters[chapterIdx + 1] || null;
 
-  // highlights (stored in localStorage per chapterId)
-  const [highlights, setHighlights] = useState(() => {
-    try {
-      const saved = localStorage.getItem(`hl_${chapterId}`);
-      return saved ? JSON.parse(saved) : [];
-    } catch { return []; }
-  });
+  const highlightsFromRedux = useSelector((s) => s.highlights?.highlightsData || []);
+  const highlights = highlightsFromRedux.map((h) => ({
+    _id: h._id,
+    text: h.selectedText,
+    color: "yellow", // backend doesn't store color, default to yellow
+  }));
 
   // Step-1 pencil bubble state: { text, position }
   const [toolbar, setToolbar] = useState(null);
@@ -1019,16 +1364,52 @@ export default function Notes() {
   const [noteSelection, setNoteSelection] = useState(null);
 
   useEffect(() => {
-    if (id) { dispatch(getChaptersByBook(id)); }
+    if (id) { 
+      dispatch(getChaptersByBook(id)); 
+      dispatch(getBookmarkByBook(id));
+      dispatch(getBookProgress(id));
+    }
     if (books.length === 0) dispatch(getAllBooks());
+
+    return () => {
+      dispatch(clearCurrentBookmark());
+      dispatch(clearCurrentProgress());
+      dispatch(clearHighlights());
+    };
   }, [id, dispatch]);
 
   useEffect(() => {
     if (chapterId && id) {
       dispatch(clearNotes());
       dispatch(getNotesByBookAndChapter({ bookId: id, chapterId }));
+      dispatch(clearHighlights());
+      dispatch(getHighlightsByChapter({ bookId: id, chapterId }));
     }
   }, [chapterId, id, dispatch]);
+
+  // Sync reading progress
+  useEffect(() => {
+    if (id && chapterId && chapters.length > 0 && hasFetchedProgress && !isProgressLoading) {
+      const newProgress = Math.round(((chapterIdx + 1) / chapters.length) * 100);
+      if (currentProgress) {
+        if (currentProgress.chapter !== chapterId || currentProgress.progress !== newProgress) {
+          dispatch(updateReadingProgress({
+            progressId: currentProgress._id,
+            data: {
+              progress: newProgress,
+              chapter: chapterId
+            }
+          }));
+        }
+      } else {
+        dispatch(createReadingProgress({
+          book: id,
+          chapter: chapterId,
+          progress: newProgress
+        }));
+      }
+    }
+  }, [chapterId, id, chapters.length, chapterIdx, currentProgress, hasFetchedProgress, isProgressLoading, dispatch]);
 
   // persist highlights
   useEffect(() => {
@@ -1048,6 +1429,37 @@ export default function Notes() {
       if (!selection || selection.isCollapsed || selection.rangeCount === 0) return null;
       const selectedText = selection.toString().trim();
       if (selectedText.length < 3) return null;
+
+      // Restrict selection to the reader-content container only
+      const anchorNode = selection.anchorNode;
+      const focusNode = selection.focusNode;
+      
+      const isInsideReaderContent = (node) => {
+        let current = node;
+        while (current) {
+          if (current.classList && current.classList.contains("reader-content")) {
+            return true;
+          }
+          current = current.parentNode;
+        }
+        return false;
+      };
+
+      const isInsideBookText = (node) => {
+        let current = node;
+        while (current) {
+          if (current.classList && current.classList.contains("book-text-paragraph")) {
+            return true;
+          }
+          current = current.parentNode;
+        }
+        return false;
+      };
+
+      if (!isInsideBookText(anchorNode) || !isInsideBookText(focusNode)) {
+        return null;
+      }
+
       try {
         const range = selection.getRangeAt(0);
         const rect  = range.getBoundingClientRect();
@@ -1126,10 +1538,15 @@ export default function Notes() {
   const handleHighlight = (colorId) => {
     const src = highlightPicker || toolbar;
     if (!src) return;
-    const already = highlights.find(h => h.text.toLowerCase() === src.text.toLowerCase() && h.color === colorId);
+    const already = highlights.find(h => h.text.toLowerCase() === src.text.toLowerCase());
     if (already) { toast.error("Already highlighted!"); setHighlightPicker(null); setToolbar(null); return; }
-    setHighlights(prev => [...prev, { text: src.text, color: colorId }]);
-    toast.success("✨ Highlighted!");
+    
+    dispatch(createHighlight({
+      book: id,
+      chapter: chapterId,
+      selectedText: src.text
+    }));
+
     window.getSelection()?.removeAllRanges();
     setHighlightPicker(null);
     setToolbar(null);
@@ -1163,6 +1580,10 @@ export default function Notes() {
     await dispatch(deleteNote(noteId));
   };
 
+  const handleDeleteHighlight = async (highlightId) => {
+    await dispatch(deleteHighlight(highlightId));
+  };
+
   const handleHighlightClick = (noteId) => {
     setActiveTab("notes");
     setPanelOpen(true);
@@ -1178,6 +1599,36 @@ export default function Notes() {
         }, 2000);
       }
     }, 100);
+  };
+
+  const handleBookmarkToggle = () => {
+    if (currentBookmark && currentBookmark.chapter === chapterId) {
+      dispatch(deleteBookmark(currentBookmark._id));
+    } else {
+      dispatch(createBookmark({
+        book: id,
+        chapter: chapterId
+      }));
+    }
+  };
+
+  const handleOpenBookmarksModal = () => {
+    dispatch(getAllBookmarks());
+    setShowBookmarksModal(true);
+  };
+
+  const handleDeleteFromModal = async (bookmarkId) => {
+    await dispatch(deleteBookmark(bookmarkId));
+    // Refresh the list
+    dispatch(getAllBookmarks());
+    // If deleted bookmark is current chapter's bookmark, clear it
+    if (currentBookmark && currentBookmark._id === bookmarkId) {
+      dispatch(getBookmarkByBook(id));
+    }
+  };
+
+  const handleNavigateToBookmark = (bookId, chapterId) => {
+    navigate(`/books/${bookId}/chapters/${chapterId}/notes`);
   };
 
   const navigateChapter = (ch) => {
@@ -1317,22 +1768,79 @@ export default function Notes() {
           </div>
         </div>
 
-        {/* Progress bar */}
+        {/* Progress bar with percentage */}
         {chapters.length > 0 && (
-          <div style={{
-            flex: 2, maxWidth: 180,
-            height: 4, background: activeTheme.border,
-            borderRadius: 2, overflow: "hidden",
-          }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 2, maxWidth: 220 }}>
             <div style={{
-              height: "100%",
-              width: `${((chapterIdx + 1) / chapters.length) * 100}%`,
-              background: C.accent,
-              borderRadius: 2,
-              transition: "width 0.5s ease",
-            }} />
+              flex: 1,
+              height: 4, background: activeTheme.border,
+              borderRadius: 2, overflow: "hidden",
+            }}>
+              <div style={{
+                height: "100%",
+                width: `${((chapterIdx + 1) / chapters.length) * 100}%`,
+                background: C.accent,
+                borderRadius: 2,
+                transition: "width 0.5s ease",
+              }} />
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 700, color: activeTheme.subtext, minWidth: 28 }}>
+              {Math.round(((chapterIdx + 1) / chapters.length) * 100)}%
+            </span>
           </div>
         )}
+
+        {/* Bookmark Toggle */}
+        <button
+          onClick={handleBookmarkToggle}
+          title={currentBookmark && currentBookmark.chapter === chapterId ? "Remove bookmark" : "Bookmark this chapter"}
+          style={{
+            background: "transparent",
+            border: "none",
+            color: (currentBookmark && currentBookmark.chapter === chapterId) ? C.accent : activeTheme.text,
+            cursor: "pointer",
+            borderRadius: 8,
+            padding: "6px 8px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "all 0.2s",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = activeTheme.accentLight)}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+        >
+          {currentBookmark && currentBookmark.chapter === chapterId ? (
+            <BookmarkFilledIcon size={20} />
+          ) : (
+            <BookmarkIcon size={20} />
+          )}
+        </button>
+
+        {/* View All Bookmarks Button */}
+        <button
+          onClick={handleOpenBookmarksModal}
+          title="View all my bookmarks"
+          style={{
+            background: "transparent",
+            border: `1.5px solid ${activeTheme.border}`,
+            color: activeTheme.text,
+            cursor: "pointer",
+            borderRadius: 8,
+            padding: "5px 10px",
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            fontFamily: "'Manrope',sans-serif",
+            fontWeight: 700,
+            fontSize: 12,
+            transition: "all 0.2s",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = activeTheme.accentLight; e.currentTarget.style.borderColor = C.accent; e.currentTarget.style.color = C.accent; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = activeTheme.border; e.currentTarget.style.color = activeTheme.text; }}
+        >
+          <ListIcon size={15} />
+          <span style={{ display: "none" }} className="bm-label">Bookmarks</span>
+        </button>
 
         {/* Mobile / Tablet study guide toggle */}
         <button
@@ -1551,6 +2059,7 @@ export default function Notes() {
             isLoading={isLoading}
             onAddNote={handleAddNote}
             onDeleteNote={handleDeleteNote}
+            onDeleteHighlight={handleDeleteHighlight}
             onClose={() => setPanelOpen(false)}
             isMobile={false}
             tab={activeTab}
@@ -1596,6 +2105,7 @@ export default function Notes() {
             isLoading={isLoading}
             onAddNote={handleAddNote}
             onDeleteNote={handleDeleteNote}
+            onDeleteHighlight={handleDeleteHighlight}
             onClose={() => setPanelOpen(false)}
             isMobile={true}
             tab={activeTab}
@@ -1624,6 +2134,17 @@ export default function Notes() {
           onHighlight={handleHighlight}
           onNote={handleNoteFromSelection}
           onClose={() => { setHighlightPicker(null); window.getSelection()?.removeAllRanges(); }}
+        />
+      )}
+
+      {/* ── Bookmarks Modal ───────────────────────────────────────────────────── */}
+      {showBookmarksModal && (
+        <BookmarksModal
+          bookmarks={allBookmarksData}
+          isLoading={isBookmarksLoading}
+          onClose={() => setShowBookmarksModal(false)}
+          onNavigate={handleNavigateToBookmark}
+          onDelete={handleDeleteFromModal}
         />
       )}
     </div>
