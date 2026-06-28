@@ -12,23 +12,23 @@ export const createBook = createAsyncThunk(
         console.log("incoming createBook data to the thunk", data);
 
         try {
-            // Backend uses multer upload.fields([...]) so we MUST send multipart/form-data
             const formData = new FormData();
 
-            // Append all text fields
-            const textFields = ["title", "author", "price", "category", "language", "description", "stock"];
+            const textFields = ["title", "author", "price", "category", "language", "description", "stock", "bookUrl", "coverUrl", "book_url", "cover_url"];
             textFields.forEach((key) => {
-                if (data[key] !== undefined && data[key] !== null) {
+                if (data[key] !== undefined && data[key] !== null && data[key] !== '' && !(data[key] instanceof File)) {
                     formData.append(key, data[key]);
                 }
             });
 
-            // Append file fields if provided (File objects from <input type="file">)
-            if (data.cover_image instanceof File) {
-                formData.append("cover_image", data.cover_image);
+            const cover = data.cover_image || data.coverUrl || data.cover_url;
+            if (cover instanceof File) {
+                formData.append("cover_image", cover);
             }
-            if (data.file_url instanceof File) {
-                formData.append("file_url", data.file_url);
+
+            const bookFile = data.file_url || data.bookUrl || data.fileUrl || data.book_url;
+            if (bookFile instanceof File) {
+                formData.append("file_url", bookFile);
             }
 
             const response = axiosInstance.post("/books", formData, {
@@ -72,7 +72,29 @@ export const updateBook = createAsyncThunk(
     "/books/updateBook",
     async ({ id, data }) => {
         try {
-            const response = axiosInstance.put(`/books/${id}`, data);
+            let payload = data;
+            let config = {};
+
+            const hasFiles = (data.cover_image instanceof File) || (data.file_url instanceof File) || (data.coverUrl instanceof File) || (data.bookUrl instanceof File);
+
+            if (hasFiles || !(data instanceof FormData)) {
+                const formData = new FormData();
+                Object.keys(data).forEach((key) => {
+                    if (data[key] !== undefined && data[key] !== null && data[key] !== '') {
+                        if (data[key] instanceof File) {
+                            if (key === 'coverUrl' || key === 'cover_url') formData.append('cover_image', data[key]);
+                            else if (key === 'bookUrl' || key === 'fileUrl' || key === 'book_url') formData.append('file_url', data[key]);
+                            else formData.append(key, data[key]);
+                        } else {
+                            formData.append(key, data[key]);
+                        }
+                    }
+                });
+                payload = formData;
+                config = { headers: { "Content-Type": "multipart/form-data" } };
+            }
+
+            const response = axiosInstance.put(`/books/${id}`, payload, config);
 
             toast.promise(response, {
                 loading: "Updating book...",

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { logout } from '../redux/slices/authSlice';
+import logo from '../assets/ePustakalayNewLogo.png';
 import {
   Search,
   Bell,
@@ -160,12 +161,13 @@ const Header = ({ toggleSidebar }) => {
           </button>
 
           {/* Logo Branding */}
-          <div className="flex items-center gap-2.5 text-lg font-extrabold text-[#0a2f35] tracking-tight">
-            <div className="w-8.5 h-8.5 rounded-lg bg-[#0a2f35]/5 flex items-center justify-center border border-[#0a2f35]/10">
-              <BookOpen className="w-4.5 h-4.5 text-[#0a2f35]" />
-            </div>
-            <span className="hidden sm:inline">ePustakalay</span>
-          </div>
+          <NavLink to="/" className="flex items-center">
+            <img
+              src={logo}
+              alt="ePustakalay Logo"
+              className="h-10 md:h-11 w-auto object-contain"
+            />
+          </NavLink>
 
           {/* Header Search Bar (Desktop only) */}
           <div className="hidden lg:flex items-center bg-[#f1f5f9] rounded-full px-4 py-2 w-[300px] ml-4 border border-slate-200/50 hover:border-slate-300/60 focus-within:border-[#0a2f35]/25 focus-within:bg-white transition-all group">
@@ -194,149 +196,151 @@ const Header = ({ toggleSidebar }) => {
 
         {/* Right Side: Notification Bell, Settings Cog, User Profile */}
         <div className="flex items-center gap-4 pl-4 flex-shrink-0">
-          <div className="flex items-center gap-3">
+          {!location.pathname.startsWith('/admin') && (
+            <>
+              <div className="flex items-center gap-3">
 
-            {/* Notification Button & Floating Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => {
-                  setIsNotificationsOpen(!isNotificationsOpen);
-                  setIsProfileOpen(false);
-                }}
-                className="relative bg-transparent border-none text-slate-500 hover:text-[#0a2f35] hover:bg-slate-100/50 cursor-pointer transition-all p-2 rounded-xl"
-              >
-                <Bell className="w-[18px] h-[18px]" />
-                {notifications.length > 0 && (
-                  <span className="absolute top-1.5 right-1.5 bg-red-500 border border-white rounded-full w-2 h-2"></span>
-                )}
-              </button>
-
-              {isNotificationsOpen && (
-                <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 p-4 animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-2.5">
-                    <h3 className="font-bold text-xs text-[#0a2f35]">Notifications</h3>
-                    {notifications.length > 0 && (
-                      <button
-                        onClick={handleClearAllNotifications}
-                        className="text-[10px] font-bold text-[#0a2f35] hover:underline cursor-pointer"
-                      >
-                        Clear All
-                      </button>
-                    )}
-                  </div>
-
-                  {notifications.length === 0 ? (
-                    <div className="py-6 text-center text-xs text-slate-400 font-medium flex flex-col items-center gap-1.5">
-                      <Bell className="w-5 h-5 text-slate-300" />
-                      <span>No new notifications</span>
-                    </div>
-                  ) : (
-                    <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                      {notifications.map(notif => (
-                        <div
-                          key={notif.id}
-                          className="flex items-start gap-2.5 p-2 rounded-xl bg-slate-50 hover:bg-slate-100/60 border border-slate-100/50 transition-all group"
-                        >
-                          <span className="mt-0.5 text-slate-400 flex-shrink-0">
-                            {notif.type === 'reservation' ? (
-                              <BookOpen className="w-3.5 h-3.5 text-teal-600" />
-                            ) : notif.type === 'system' ? (
-                              <Settings className="w-3.5 h-3.5" />
-                            ) : (
-                              <User className="w-3.5 h-3.5" />
-                            )}
-                          </span>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[11px] text-slate-700 font-semibold leading-normal break-words">{notif.text}</p>
-                            <span className="text-[9px] text-slate-400 font-bold mt-0.5 block">{notif.time}</span>
-                          </div>
-                          <button
-                            onClick={(e) => handleDeleteNotification(notif.id, e)}
-                            className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 p-1 rounded transition-all cursor-pointer"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-
-
-          </div>
-
-          {/* User Profile Avatar & Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => {
-                setIsProfileOpen(!isProfileOpen);
-                setIsNotificationsOpen(false);
-              }}
-              className="flex items-center gap-1.5 cursor-pointer p-1 rounded-xl hover:bg-slate-100/50 transition-all border border-transparent"
-            >
-              <InitialsAvatar name={displayName} size={30} />
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-            </button>
-
-            {isProfileOpen && (
-              <div className="absolute right-0 mt-3 w-72 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 p-5 animate-in fade-in slide-in-from-top-2 duration-150">
-                {/* Profile Header */}
-                <div className="text-center pb-4 border-b border-slate-100">
-                  <div className="relative w-14 h-14 mx-auto mb-2 flex items-center justify-center">
-                    <InitialsAvatar name={displayName} size={52} />
-                    <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white"></span>
-                  </div>
-                  <h4 className="font-extrabold text-xs text-[#0a2f35] leading-tight mt-2">{displayName}</h4>
-                  <span className="inline-block text-[9px] font-bold uppercase tracking-wider bg-slate-50 border border-slate-100 text-slate-400 px-2.5 py-0.5 rounded-full mt-1.5">
-                    {roleLabel}
-                  </span>
-                </div>
-
-                {/* Profile Information List */}
-                <div className="py-3.5 space-y-2.5 border-b border-slate-100 text-[11px]">
-                  {displayEmail && (
-                    <div className="flex items-center gap-2 text-slate-500">
-                      <Mail className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                      <span className="truncate">{displayEmail}</span>
-                    </div>
-                  )}
-                  {data?._id && (
-                    <div className="flex items-center gap-2 text-slate-500">
-                      <User className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                      <span className="truncate">ID: {data._id}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 text-slate-500">
-                    <Shield className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                    <span>Access Role: {roleLabel}</span>
-                  </div>
-                </div>
-
-                {/* Action Items */}
-                <div className="pt-3.5 flex flex-col gap-1">
+                {/* Notification Button & Floating Dropdown */}
+                <div className="relative">
                   <button
                     onClick={() => {
-                      setIsSettingsOpen(true);
+                      setIsNotificationsOpen(!isNotificationsOpen);
                       setIsProfileOpen(false);
                     }}
-                    className="w-full text-left text-xs font-semibold px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-[#0a2f35] transition-colors cursor-pointer"
+                    className="relative bg-transparent border-none text-slate-500 hover:text-[#0a2f35] hover:bg-slate-100/50 cursor-pointer transition-all p-2 rounded-xl"
                   >
-                    Manage Settings
+                    <Bell className="w-[18px] h-[18px]" />
+                    {notifications.length > 0 && (
+                      <span className="absolute top-1.5 right-1.5 bg-red-500 border border-white rounded-full w-2 h-2"></span>
+                    )}
                   </button>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left text-xs font-semibold px-3 py-2 rounded-xl text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors flex items-center gap-2 cursor-pointer border border-transparent hover:border-red-100"
-                  >
-                    <LogOut className="w-3.5 h-3.5" /> Logout
-                  </button>
+
+                  {isNotificationsOpen && (
+                    <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 p-4 animate-in fade-in slide-in-from-top-2 duration-150">
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-2.5">
+                        <h3 className="font-bold text-xs text-[#0a2f35]">Notifications</h3>
+                        {notifications.length > 0 && (
+                          <button
+                            onClick={handleClearAllNotifications}
+                            className="text-[10px] font-bold text-[#0a2f35] hover:underline cursor-pointer"
+                          >
+                            Clear All
+                          </button>
+                        )}
+                      </div>
+
+                      {notifications.length === 0 ? (
+                        <div className="py-6 text-center text-xs text-slate-400 font-medium flex flex-col items-center gap-1.5">
+                          <Bell className="w-5 h-5 text-slate-300" />
+                          <span>No new notifications</span>
+                        </div>
+                      ) : (
+                        <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                          {notifications.map(notif => (
+                            <div
+                              key={notif.id}
+                              className="flex items-start gap-2.5 p-2 rounded-xl bg-slate-50 hover:bg-slate-100/60 border border-slate-100/50 transition-all group"
+                            >
+                              <span className="mt-0.5 text-slate-400 flex-shrink-0">
+                                {notif.type === 'reservation' ? (
+                                  <BookOpen className="w-3.5 h-3.5 text-teal-600" />
+                                ) : notif.type === 'system' ? (
+                                  <Settings className="w-3.5 h-3.5" />
+                                ) : (
+                                  <User className="w-3.5 h-3.5" />
+                                )}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[11px] text-slate-700 font-semibold leading-normal break-words">{notif.text}</p>
+                                <span className="text-[9px] text-slate-400 font-bold mt-0.5 block">{notif.time}</span>
+                              </div>
+                              <button
+                                onClick={(e) => handleDeleteNotification(notif.id, e)}
+                                className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 p-1 rounded transition-all cursor-pointer"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
+
               </div>
-            )}
-          </div>
+
+              {/* User Profile Avatar & Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    setIsProfileOpen(!isProfileOpen);
+                    setIsNotificationsOpen(false);
+                  }}
+                  className="flex items-center gap-1.5 cursor-pointer p-1 rounded-xl hover:bg-slate-100/50 transition-all border border-transparent"
+                >
+                  <InitialsAvatar name={displayName} size={30} />
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                </button>
+
+                {isProfileOpen && (
+                  <div className="absolute right-0 mt-3 w-72 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 p-5 animate-in fade-in slide-in-from-top-2 duration-150">
+                    {/* Profile Header */}
+                    <div className="text-center pb-4 border-b border-slate-100">
+                      <div className="relative w-14 h-14 mx-auto mb-2 flex items-center justify-center">
+                        <InitialsAvatar name={displayName} size={52} />
+                        <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white"></span>
+                      </div>
+                      <h4 className="font-extrabold text-xs text-[#0a2f35] leading-tight mt-2">{displayName}</h4>
+                      <span className="inline-block text-[9px] font-bold uppercase tracking-wider bg-slate-50 border border-slate-100 text-slate-400 px-2.5 py-0.5 rounded-full mt-1.5">
+                        {roleLabel}
+                      </span>
+                    </div>
+
+                    {/* Profile Information List */}
+                    <div className="py-3.5 space-y-2.5 border-b border-slate-100 text-[11px]">
+                      {displayEmail && (
+                        <div className="flex items-center gap-2 text-slate-500">
+                          <Mail className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                          <span className="truncate">{displayEmail}</span>
+                        </div>
+                      )}
+                      {data?._id && (
+                        <div className="flex items-center gap-2 text-slate-500">
+                          <User className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                          <span className="truncate">ID: {data._id}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 text-slate-500">
+                        <Shield className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                        <span>Access Role: {roleLabel}</span>
+                      </div>
+                    </div>
+
+                    {/* Action Items */}
+                    <div className="pt-3.5 flex flex-col gap-1">
+                      <button
+                        onClick={() => {
+                          setIsSettingsOpen(true);
+                          setIsProfileOpen(false);
+                        }}
+                        className="w-full text-left text-xs font-semibold px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-[#0a2f35] transition-colors cursor-pointer"
+                      >
+                        Manage Settings
+                      </button>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left text-xs font-semibold px-3 py-2 rounded-xl text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors flex items-center gap-2 cursor-pointer border border-transparent hover:border-red-100"
+                      >
+                        <LogOut className="w-3.5 h-3.5" /> Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </header>
 
