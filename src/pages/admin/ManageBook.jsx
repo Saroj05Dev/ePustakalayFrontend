@@ -130,6 +130,27 @@ const FormSelect = ({ label, required, children, ...props }) => (
 );
 
 
+const FormFileInput = ({ label, required, accept, onChange, fileName }) => (
+  <div>
+    {label && (
+      <label className="block text-slate-500 font-bold mb-1 text-xs">
+        {label} {required && '*'}
+      </label>
+    )}
+    <label className="flex items-center gap-3 w-full bg-slate-50 border border-slate-200 border-dashed rounded-xl px-3.5 py-2.5 cursor-pointer hover:border-[#0a2f35] transition-colors group">
+      <span className="w-7 h-7 rounded-lg bg-[#0a2f35]/8 flex items-center justify-center flex-shrink-0 group-hover:bg-[#0a2f35]/12 transition-colors">
+        <svg className="w-3.5 h-3.5 text-[#0a2f35]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+      </span>
+      <span className="text-xs font-semibold text-slate-400 group-hover:text-slate-600 transition-colors truncate flex-1">
+        {fileName ? fileName : 'Click to upload file…'}
+      </span>
+      <input type="file" accept={accept} required={required} onChange={onChange} className="hidden" />
+    </label>
+  </div>
+);
+
 const ManageBooks = ({ activeNav, setActiveNav }) => {
   const dispatch = useDispatch();
   const reduxBooks = useSelector((state) => state.books.booksData) || [];
@@ -157,6 +178,8 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
     category: '',
     language: 'English',
     description: '',
+    cover_image: null,
+    file_url: null,
   });
 
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -252,15 +275,35 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
     };
   });
 
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('All Categories');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
   const filteredBooks = useMemo(() => {
     return books.filter((book) => {
-      return (
+      const matchesSearch =
         book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        book.categoryName.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+        book.categoryName.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesCategory =
+        selectedCategoryFilter === 'All Categories' ||
+        book.categoryName === selectedCategoryFilter ||
+        book.category === selectedCategoryFilter;
+
+      return matchesSearch && matchesCategory;
     });
-  }, [books, searchTerm]);
+  }, [books, searchTerm, selectedCategoryFilter]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategoryFilter]);
+
+  const totalPages = Math.ceil(filteredBooks.length / itemsPerPage) || 1;
+  const paginatedBooks = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredBooks.slice(start, start + itemsPerPage);
+  }, [filteredBooks, currentPage, itemsPerPage]);
 
   const activeReadersCount = usersData.filter(u => (u.status || 'Active') === 'Active').length;
 
@@ -278,9 +321,11 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
       category: formData.category,
       language: formData.language,
       description: formData.description || 'No description provided.',
+      cover_image: formData.cover_image || null,
+      file_url: formData.file_url || null,
     }));
     setModal(null);
-    setFormData({ title: '', author: '', price: '', category: reduxCategories[0]?._id || '', language: 'English', description: '' });
+    setFormData({ title: '', author: '', price: '', category: reduxCategories[0]?._id || '', language: 'English', description: '', cover_image: null, file_url: null });
   };
 
   const handleEditBookSubmit = (e) => {
@@ -441,20 +486,19 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
         {/* ── KPI Cards ──────────────────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
           {[
-            { label: 'Total Books', icon: Book, value: reduxBooks.length, sub: 'Dynamic catalog size', subClass: 'text-emerald-600' },
-            { label: 'Total Categories', icon: Tag, value: reduxCategories.length, sub: 'Dynamic category count', subClass: 'text-emerald-600' },
-            { label: 'Total Chapters', icon: BookMarked, value: totalChaptersCount, sub: 'Dynamic chapter count', subClass: 'text-emerald-600' },
-            { label: 'Active Readers', icon: Users, value: activeReadersCount, sub: 'Live members online', subClass: 'text-emerald-600' },
-          ].map(({ label, icon: Icon, value, sub, subClass }) => (
-            <div key={label} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between h-[130px] hover:shadow-md transition-shadow">
+            { label: 'Total Books', icon: Book, value: reduxBooks.length },
+            { label: 'Total Categories', icon: Tag, value: reduxCategories.length },
+            { label: 'Total Chapters', icon: BookMarked, value: totalChaptersCount },
+            { label: 'Active Readers', icon: Users, value: activeReadersCount },
+          ].map(({ label, icon: Icon, value }) => (
+            <div key={label} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start">
                 <h3 className="text-slate-400 text-xs font-semibold uppercase tracking-wider">{label}</h3>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[#0a2f35]/5 text-[#0a2f35] border border-[#0a2f35]/10">
                   <Icon className="w-4.5 h-4.5" />
                 </div>
               </div>
-              <div className="text-2xl font-extrabold text-[#0a2f35] mt-1">{value}</div>
-              <div className={`flex items-center gap-2 mt-auto text-xs font-bold ${subClass}`}>{sub}</div>
+              <div className="text-2xl font-extrabold text-[#0a2f35] mt-2">{value}</div>
             </div>
           ))}
         </div>
@@ -462,16 +506,20 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
           <div className="flex flex-col sm:flex-row items-center justify-between p-5 border-b border-slate-100 gap-4">
             <div className="flex gap-3 w-full sm:w-auto">
-              <select className="bg-slate-50 border border-slate-200 text-[#0a2f35] text-xs rounded-xl px-4 py-2 outline-none focus:border-[#0a2f35] cursor-pointer font-bold">
-                <option>All Categories</option>
-                {reduxCategories.map(cat => <option key={cat._id}>{cat.category_name}</option>)}
+              <select
+                value={selectedCategoryFilter}
+                onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+                className="bg-slate-50 border border-slate-200 text-[#0a2f35] text-xs rounded-xl px-4 py-2 outline-none focus:border-[#0a2f35] cursor-pointer font-bold"
+              >
+                <option value="All Categories">All Categories</option>
+                {reduxCategories.map(cat => <option key={cat._id} value={cat.category_name}>{cat.category_name}</option>)}
               </select>
               <select className="bg-slate-50 border border-slate-200 text-[#0a2f35] text-xs rounded-xl px-4 py-2 outline-none focus:border-[#0a2f35] cursor-pointer font-bold">
                 <option>Stock Status</option>
               </select>
             </div>
             <div className="text-xs font-bold text-slate-400 uppercase">
-              Showing <span className="text-slate-700">1–{filteredBooks.length}</span> of {filteredBooks.length} books
+              Showing <span className="text-slate-700">{filteredBooks.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}–{Math.min(currentPage * itemsPerPage, filteredBooks.length)}</span> of {filteredBooks.length} books
             </div>
           </div>
 
@@ -486,7 +534,7 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 text-xs">
-                {filteredBooks.length === 0 ? (
+                {paginatedBooks.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center text-slate-400 text-sm font-semibold">
                       <div className="flex flex-col items-center gap-2">
@@ -495,11 +543,21 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
                       </div>
                     </td>
                   </tr>
-                ) : filteredBooks.map((book) => (
+                ) : paginatedBooks.map((book) => (
                   <tr key={book.id} className="hover:bg-slate-50/40 transition-colors group">
                     <td className="px-6 py-4 flex items-center gap-4">
-                      <div className="w-10 h-14 bg-slate-50 rounded-lg flex items-center justify-center border border-slate-200 shadow-sm flex-shrink-0 text-[#0a2f35]">
-                        <BookOpen className="w-5 h-5" />
+                      <div className="w-10 h-14 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200 shadow-sm flex-shrink-0 text-[#0a2f35] overflow-hidden relative">
+                        {book.cover_image || book.coverUrl ? (
+                          <img
+                            src={book.cover_image || book.coverUrl}
+                            alt={book.title}
+                            className="w-full h-full object-cover relative z-10"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                        ) : null}
+                        <BookOpen className="w-5 h-5 absolute z-0 text-slate-400" />
                       </div>
                       <div>
                         <div className="font-bold text-[#0a2f35] text-base tracking-tight leading-tight">{book.title}</div>
@@ -538,19 +596,29 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
 
           {/* Pagination */}
           <div className="p-5 border-t border-slate-100 flex items-center justify-between text-xs font-semibold">
-            <button className="text-slate-400 hover:text-[#0a2f35] transition-colors flex items-center gap-1 cursor-pointer">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`flex items-center gap-1 transition-colors cursor-pointer ${currentPage === 1 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-400 hover:text-[#0a2f35]'}`}
+            >
               <ChevronLeft className="w-4 h-4" /> Previous
             </button>
             <div className="flex items-center gap-1.5">
-              {[1, 2, 3].map(n => (
-                <button key={n} className={`w-8 h-8 flex items-center justify-center rounded-xl font-bold text-xs cursor-pointer transition-colors ${n === 1 ? 'bg-[#0a2f35] text-white shadow-sm' : 'text-slate-400 hover:bg-slate-50 hover:text-[#0a2f35]'}`}>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+                <button
+                  key={n}
+                  onClick={() => setCurrentPage(n)}
+                  className={`w-8 h-8 flex items-center justify-center rounded-xl font-bold text-xs cursor-pointer transition-colors ${n === currentPage ? 'bg-[#0a2f35] text-white shadow-sm' : 'text-slate-400 hover:bg-slate-50 hover:text-[#0a2f35]'}`}
+                >
                   {n}
                 </button>
               ))}
-              <span className="text-slate-300 px-1 font-semibold">…</span>
-              <button className="w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-50 hover:text-[#0a2f35] transition-colors cursor-pointer">128</button>
             </div>
-            <button className="text-slate-400 hover:text-[#0a2f35] transition-colors flex items-center gap-1 cursor-pointer">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className={`flex items-center gap-1 transition-colors cursor-pointer ${currentPage === totalPages ? 'text-slate-300 cursor-not-allowed' : 'text-slate-400 hover:text-[#0a2f35]'}`}
+            >
               Next <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -582,8 +650,22 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
                 <option value="">— Select Category —</option>
                 {reduxCategories.map(cat => <option key={cat._id} value={cat._id}>{cat.category_name}</option>)}
               </FormSelect>
+              <div className="grid grid-cols-1 gap-4">
+                <FormFileInput
+                  label="Cover Image"
+                  accept="image/*"
+                  fileName={formData.cover_image?.name}
+                  onChange={e => setFormData({ ...formData, cover_image: e.target.files[0] || null })}
+                />
+                <FormFileInput
+                  label="Book File (PDF / EPUB)"
+                  accept=".pdf,.epub,application/pdf,application/epub+zip"
+                  fileName={formData.file_url?.name}
+                  onChange={e => setFormData({ ...formData, file_url: e.target.files[0] || null })}
+                />
+              </div>
             </div>
-            <ModalFooter onCancel={() => setModal(null)} submitLabel="Add Book" />
+            <ModalFooter onCancel={() => { setModal(null); setFormData({ title: '', author: '', price: '', category: '', language: 'English', description: '', cover_image: null, file_url: null }); }} submitLabel="Add Book" />
           </form>
         </Modal>
       )}

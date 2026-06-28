@@ -334,16 +334,24 @@ const Users = ({ activeNav, setActiveNav }) => {
                                         const joinDate = user.createdAt
                                             ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
                                             : "Oct 12, 2023";
-                                        const avatarUrl = `https://i.pravatar.cc/150?u=${user._id}`;
+                                        const userImg = user.avatar?.secure_url || user.avatar || user.profileImage || user.profile_image || user.image || user.photo || user.profile_picture;
                                         return (
                                             <tr key={user._id} className="hover:bg-slate-50/40 transition-colors group">
                                                 {/* User Entity */}
                                                 <td className="px-6 py-4.5 flex items-center gap-3">
-                                                    <img
-                                                        src={avatarUrl}
-                                                        alt={user.name}
-                                                        className="w-9 h-9 rounded-full object-cover border border-slate-200/50 shadow-sm"
-                                                    />
+                                                    <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200/60 shadow-sm flex-shrink-0 text-slate-400 overflow-hidden relative">
+                                                        {userImg ? (
+                                                            <img
+                                                                src={userImg}
+                                                                alt={user.name}
+                                                                className="w-full h-full object-cover relative z-10"
+                                                                onError={(e) => {
+                                                                    e.target.style.display = 'none';
+                                                                }}
+                                                            />
+                                                        ) : null}
+                                                        <User className="w-4 h-4 text-slate-400 absolute z-0" />
+                                                    </div>
                                                     <div className="leading-tight">
                                                         <div className="font-bold text-slate-700 text-sm tracking-tight">{user.name}</div>
                                                         <div className="text-slate-400 text-[11px] mt-0.5">{user.email}</div>
