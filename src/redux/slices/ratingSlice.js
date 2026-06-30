@@ -8,6 +8,7 @@ const initialState = {
         averageRating: 0,
         totalRatings: 0,
         userRating: null,
+        reviews: [],
     },
 };
 
@@ -46,7 +47,7 @@ export const getAllRating = createAsyncThunk(
             return response.data;
         } catch (error) {
             console.log(error);
-            toast.error("Failed to fetch ratings");
+            // No toast here — guest users get 401 silently (it's a public page)
             return rejectWithValue(
                 error?.response?.data || "Something went wrong"
             );
@@ -83,10 +84,45 @@ export const updateRating = createAsyncThunk(
     }
 );
 
+// Delete Rating
+export const deleteRating = createAsyncThunk(
+    "/ratings/deleteRating",
+    async (id, { rejectWithValue }) => {
+        try {
+            const responsePromise = axiosInstance.delete(`/ratings/${id}`);
+
+            toast.promise(responsePromise, {
+                loading: "Deleting rating...",
+                success: (res) =>
+                    res?.data?.message || "Rating deleted successfully",
+                error: (err) =>
+                    err?.response?.data?.message || "Failed to delete rating",
+            });
+
+            const response = await responsePromise;
+            return { id, data: response.data };
+        } catch (error) {
+            console.log(error);
+            return rejectWithValue(
+                error?.response?.data || "Something went wrong"
+            );
+        }
+    }
+);
+
 const ratingSlice = createSlice({
     name: "ratings",
     initialState,
-    reducers: {},
+    reducers: {
+        clearRatings: (state) => {
+            state.ratingsData = {
+                averageRating: 0,
+                totalRatings: 0,
+                userRating: null,
+                reviews: [],
+            };
+        }
+    },
 
     extraReducers: (builder) => {
         builder
@@ -99,6 +135,7 @@ const ratingSlice = createSlice({
                     averageRating: result?.averageRating ?? 0,
                     totalRatings: result?.totalRatings ?? 0,
                     userRating: result?.userRating ?? null,
+                    reviews: result?.reviews ?? [],
                 };
             })
 
@@ -114,9 +151,23 @@ const ratingSlice = createSlice({
                 if (action.payload?.data) {
                     state.ratingsData.userRating = action.payload.data;
                 }
+            })
+
+            // Delete rating
+            .addCase(deleteRating.fulfilled, (state, action) => {
+                const deletedId = action.payload?.id;
+                state.ratingsData.reviews = state.ratingsData.reviews.filter(
+                    (r) => r._id !== deletedId
+                );
+                state.ratingsData.userRating = null;
+                if (state.ratingsData.totalRatings > 0) {
+                    state.ratingsData.totalRatings -= 1;
+                }
             });
     },
 });
+
+export const { clearRatings } = ratingSlice.actions;
 
 export default ratingSlice.reducer;
 

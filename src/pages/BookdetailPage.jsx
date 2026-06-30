@@ -3,9 +3,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 import { getAllBooks } from "../redux/slices/bookSlice";
 import { toggleWishlist, getAllWishlist } from "../redux/slices/wishlistSlice";
-import { getCart, addToCart } from "../redux/slices/cartSlice";
+import { getCart, addToCart, addToGuestCart } from "../redux/slices/cartSlice";
 import { toast } from "react-hot-toast";
-import { createRating, getAllRating ,updateRating} from "../redux/slices/ratingSlice";
+import { createRating, getAllRating, updateRating, deleteRating, clearRatings } from "../redux/slices/ratingSlice";
 
 const colors = {
   primary: "#002629",
@@ -133,32 +133,6 @@ const renderStars = (currentRating) => {
   }
   return stars;
 };
-
-const reviews = [
-  {
-    stars: 5,
-    text: "An absolute classic that feels even more relevant today. The writing is incredibly lyrical and poignant.",
-    initials: "JD",
-    name: "Julianne Devis",
-    label: "Verified Reader",
-  },
-  {
-    stars: 4,
-    text: "Beautifully designed edition. The cover alone is worth the purchase, but the story never gets old.",
-    initials: "MK",
-    name: "Marcus King",
-    label: "Verified Reader",
-  },
-  {
-    stars: 5,
-    text: "A tragic but essential read. Fitzgerald's use of color and symbolism is unparalleled. Prompt delivery from ePustakalay!",
-    initials: "SL",
-    name: "Sarah Linn",
-    label: "Verified Reader",
-  },
-];
-
-
 const navLinks = ["Home", "Books", "Wishlist"];
 
 export default function BookdetailPage() {
@@ -171,6 +145,9 @@ export default function BookdetailPage() {
   const [wishlisted, setWishlisted] = useState(false);
   const [hoverRating, setHoverRating] = useState(0);
   const [selectedRating, setSelectedRating] = useState(0);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [modalRating, setModalRating] = useState(0);
+  const [modalReviewText, setModalReviewText] = useState("");
 
   const authState = useSelector((state) => state.auth);
   const books = useSelector((state) => state.books.booksData || []);
@@ -179,11 +156,14 @@ export default function BookdetailPage() {
   const { wishlistData } = useSelector((state) => state.wishlist);
   const { ratingsData } = useSelector((state) => state.ratings);
 
+  const reviews = ratingsData?.reviews || [];
+
   const isLoggedIn = authState?.isLoggedIn || false;
+  const isCheckingAuth = authState?.isCheckingAuth || false;
 
 
-
-  const AverageRating = ratingsData?.averageRating ?? 0;
+  const rawAverageRating = ratingsData?.averageRating ?? 0;
+  const AverageRating = Math.round(rawAverageRating * 2) / 2;
   const TotalRatings = ratingsData?.totalRatings ?? 0;
   const userRating = ratingsData?.userRating;
 
@@ -206,17 +186,23 @@ export default function BookdetailPage() {
     }
   }, [dispatch, isLoggedIn]);
 
-  // Load ratings when the selected book changes
+  // Load ratings when the selected book changes or login state changes
   useEffect(() => {
     if (book?._id) {
+      dispatch(clearRatings());
       dispatch(getAllRating(book._id));
     }
-  }, [dispatch, book?._id]);
+    return () => {
+      dispatch(clearRatings());
+    };
+  }, [dispatch, book?._id, isLoggedIn]);
 
   // Initialize the selected rating when userRating changes
   useEffect(() => {
     if (userRating) {
       setSelectedRating(userRating.rating);
+      setModalRating(userRating.rating);
+      setModalReviewText(userRating.review || "");
     }
   }, [userRating]);
 
@@ -234,40 +220,21 @@ export default function BookdetailPage() {
   });
 
 
-  const handleRatingClick = async (event, star) => {
-    const { left, width } = event.currentTarget.getBoundingClientRect();
-    const clickX = event.clientX - left;
-
-    const rating = clickX < width / 2 ? star - 0.5 : star;
-
-    // Update UI immediately
-    setSelectedRating(rating);
-
-    // Save to backend
-    if (userRating) {
-      await dispatch(
-        updateRating({
-          id: userRating._id,
-          data: {
-            rating,
-          },
-        })
-      );
-    } else {
-      await dispatch(
-        createRating({
-          bookId: book._id,
-          rating,
-        })
-      );
+  // Redirect to login only after auth check is complete and user is not logged in
+  const requireLogin = () => {
+    if (isCheckingAuth) return false; // Auth still loading, don't redirect yet
+    if (!isLoggedIn) {
+      toast.error("Please log in to continue");
+      navigate("/login");
+      return true;
     }
-
-    // Refresh average and user rating
-    dispatch(getAllRating(book._id));
+    return false;
   };
 
 
-  //  Handle Add to Cart Click
+
+
+  //  Handle Add to Cart Click — works for both logged in and guest users
   const handleCartClick = async () => {
     if (!book?._id) return;
 
@@ -277,7 +244,7 @@ export default function BookdetailPage() {
     }
 
     if (isLoggedIn) {
-      // Authenticated User: Dispatch the AsyncThunk API call
+      // Logged-in user: API call
       toast.promise(
         dispatch(addToCart(book._id)).unwrap(),
         {
@@ -287,22 +254,16 @@ export default function BookdetailPage() {
         }
       );
     } else {
-      // Guest User: Dispatch the synchronous guest reducer
+      // Guest user: local cart
       dispatch(addToGuestCart(book));
-      toast.success("Added to guest cart!");
+      toast.success("Added to cart!");
     }
   };
 
-  // Toggle Wishlist Trigger
+  // Toggle Wishlist — LOGIN REQUIRED
   const handleWishlistClick = () => {
     if (!book?._id) return;
-
-    if (!isLoggedIn) {
-      toast.error("Please log in to save items to your wishlist");
-      return;
-    }
-
-    // Dispatches your exact thunk from wishlistSlice
+    if (requireLogin()) return; // Only this button needs login
     dispatch(toggleWishlist(book._id));
   };
 
@@ -364,6 +325,9 @@ export default function BookdetailPage() {
         .footer-social { transition: all 0.2s; }
         .search-input:focus { outline: none; box-shadow: 0 0 0 2px #002629; }
         .read-now-btn:hover { box-shadow: 0 12px 36px rgba(26,107,112,0.5) !important; transform: translateY(-1px); }
+        .review-card { position: relative; }
+        .review-delete-btn { opacity: 0; transition: opacity 0.2s ease, transform 0.2s ease; transform: scale(0.85); }
+        .review-card:hover .review-delete-btn { opacity: 1; transform: scale(1); }
       `}</style>
 
 
@@ -408,70 +372,18 @@ export default function BookdetailPage() {
               <div className="md:gap-4" style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
                 <span className="md:text-lg" style={{ fontSize: 15, color: colors.onSurfaceVariant, fontWeight: 500 }}> {book.author} </span>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: colors.outlineVariant, display: "inline-block" }} />
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <div className="flex flex-row items-center gap-0.5">
-                    {[1, 2, 3, 4, 5].map((star) => {
-
-                      // Show user's rating if available,
-                      // otherwise show average rating.
-                      const displayRating = userRating
-                        ? selectedRating
-                        : AverageRating;
-
-                      let fillType = "empty";
-
-                      if (displayRating >= star) {
-                        fillType = "full";
-                      } else if (
-                        displayRating > star - 1 &&
-                        displayRating < star
-                      ) {
-                        fillType = "half";
-                      }
-
-                      return (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={(e) => handleRatingClick(e, star)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            padding: 0,
-                            cursor: "pointer",
-                          }}
-                        >
-                          <StarIcon
-                            fillType={fillType}
-                            size={16}
-                          />
-                        </button>
-                      );
-                    })}
-                  </div>
-
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <StarIcon fillType="full" size={16} />
                   <span
-                    className="md:text-[15px]"
+                    className="md:text-[16px]"
                     style={{
                       fontWeight: 700,
-                      fontSize: 14,
+                      fontSize: 15,
+                      color: colors.onSurface,
                     }}
                   >
                     {AverageRating.toFixed(1)}
                   </span>
-
-                  <span
-                    className="md:text-sm"
-                    style={{
-                      color: colors.onSurfaceVariant,
-                      fontSize: 13,
-                    }}
-                  >
-                    {TotalRatings}{" "}
-                    {TotalRatings === 1 ? "review" : "reviews"}
-                  </span>
-
-
                 </div>
               </div>
             </div>
@@ -572,6 +484,7 @@ export default function BookdetailPage() {
               <p className="md:text-base" style={{ color: colors.onSurfaceVariant, margin: 0, fontSize: 14 }}>Hear from our community of book lovers.</p>
             </div>
             <button
+              onClick={() => setShowReviewModal(true)}
               className="review-btn font-headline md:text-[15px] md:gap-2"
               style={{
                 background: "transparent", border: "none", cursor: "pointer", color: colors.primary,
@@ -581,46 +494,227 @@ export default function BookdetailPage() {
               Write a Review
               <span className="review-arrow"><ArrowRightIcon size={16} /></span>
             </button>
-          </div>
+          </div>          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20 }} className="md:grid-cols-2 lg:grid-cols-3 md:gap-7">
+            {reviews.length === 0 ? (
+              <p style={{ color: colors.onSurfaceVariant, fontStyle: "italic" }}>No reviews yet. Be the first to write one!</p>
+            ) : (
+              (() => {
+                // Count frequency of each rating value
+                const ratingFreq = {};
+                reviews.forEach(r => {
+                  ratingFreq[r.rating] = (ratingFreq[r.rating] || 0) + 1;
+                });
+                // Sort: most-frequent rating first, then by rating desc as tiebreaker
+                const sortedReviews = [...reviews].sort((a, b) => {
+                  const freqDiff = (ratingFreq[b.rating] || 0) - (ratingFreq[a.rating] || 0);
+                  if (freqDiff !== 0) return freqDiff;
+                  return b.rating - a.rating;
+                });
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20 }} className="md:grid-cols-2 lg:grid-cols-3 md:gap-7">
-            {reviews.map((r, i) => (
-              <div
-                key={i}
-                className="md:p-8 md:gap-5"
-                style={{
-                  background: colors.surfaceContainerLowest, padding: 24, borderRadius: 14,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: `1px solid ${colors.outlineVariant}20`,
-                  display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 16,
-                }}
-              >
-                <div>
-                  <div className="md:mb-4" style={{ display: "flex", gap: 2, marginBottom: 12 }}>
-                    {[...Array(5)].map((_, s) => <StarIcon key={s} filled={s < r.stars} size={15} />)}
-                  </div>
-                  <p className="md:text-base" style={{ color: `${colors.onSurface}e8`, fontStyle: "italic", lineHeight: 1.7, margin: 0, fontSize: 14 }}>
-                    "{r.text}"
-                  </p>
-                </div>
-                <div className="md:gap-3" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div className="font-headline md:w-10 md:h-10 md:text-[13px]" style={{
-                    width: 36, height: 36, borderRadius: "50%",
-                    background: `${colors.primaryContainer}18`, color: colors.primary,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontWeight: 700, fontSize: 12,
-                  }}>{r.initials}</div>
-                  <div>
-                    <p className="md:text-sm" style={{ fontWeight: 700, fontSize: 13, margin: 0 }}>{r.name}</p>
-                    <p className="md:text-xs" style={{ fontSize: 11, color: colors.onSurfaceVariant, margin: 0 }}>{r.label}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+                return sortedReviews.map((r, i) => {
+                  const initials = r.userName ? r.userName.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "UR";
+                  const isOwnReview = userRating && userRating._id === r._id;
+
+                  return (
+                    <div
+                      key={r._id || i}
+                      className="review-card md:p-8 md:gap-5"
+                      style={{
+                        background: colors.surfaceContainerLowest, padding: 24, borderRadius: 14,
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: `1px solid ${colors.outlineVariant}20`,
+                        display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 16,
+                      }}
+                    >
+                      <div>
+                        {/* Stars row + delete button (always rendered, shown on hover via CSS) */}
+                        <div className="md:mb-4" style={{ display: "flex", gap: 2, marginBottom: 12, alignItems: "center", justifyContent: "space-between" }}>
+                          <div style={{ display: "flex", gap: 2 }}>
+                            {[...Array(5)].map((_, s) => (
+                              <StarIcon key={s} fillType={r.rating > s ? (r.rating > s + 0.5 ? "full" : "half") : "empty"} size={15} />
+                            ))}
+                          </div>
+                          <button
+                            className="review-delete-btn"
+                            title={isOwnReview ? "Delete your review" : "You can only delete your own review"}
+                            onClick={async () => {
+                              if (!isLoggedIn) {
+                                toast.error("Please log in to delete a review");
+                                return;
+                              }
+                              if (!isOwnReview) {
+                                toast.error("You can only delete your own review");
+                                return;
+                              }
+                              if (!userRating?._id) return;
+                              await dispatch(deleteRating(userRating._id));
+                              await dispatch(getAllRating(book._id));
+                            }}
+                            style={{
+                              background: isOwnReview ? "#fff0f0" : "#f5f5f5",
+                              border: `1px solid ${isOwnReview ? "#fca5a5" : "#d1d5db"}`,
+                              borderRadius: 8,
+                              padding: "4px 10px",
+                              cursor: isOwnReview ? "pointer" : "not-allowed",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 4,
+                              fontSize: 12,
+                              fontWeight: 600,
+                              color: isOwnReview ? "#dc2626" : "#9ca3af",
+                            }}
+                          >
+                            <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                              <path d="M10 11v6" /><path d="M14 11v6" />
+                              <path d="M9 6V4h6v2" />
+                            </svg>
+                            Delete
+                          </button>
+                        </div>
+                        <p className="md:text-base" style={{ color: `${colors.onSurface}e8`, fontStyle: "italic", lineHeight: 1.7, margin: 0, fontSize: 14 }}>
+                          "{r.review || "No review comments provided."}"
+                        </p>
+                      </div>
+                      <div className="md:gap-3" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div className="font-headline md:w-10 md:h-10 md:text-[13px]" style={{
+                          width: 36, height: 36, borderRadius: "50%",
+                          background: `${colors.primaryContainer}18`, color: colors.primary,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontWeight: 700, fontSize: 12,
+                        }}>{initials}</div>
+                        <div>
+                          <p className="md:text-sm" style={{ fontWeight: 700, fontSize: 13, margin: 0 }}>{r.userName}</p>
+                          <p className="md:text-xs" style={{ fontSize: 11, color: colors.onSurfaceVariant, margin: 0 }}>Verified Reader</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                });
+              })()
+            )}
           </div>
         </section>
       </main>
 
+      {showReviewModal && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+          backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center",
+          justifyContent: "center", zIndex: 1000, backdropFilter: "blur(4px)",
+          padding: "16px"
+        }}>
+          <div style={{
+            background: colors.surfaceContainerLowest, padding: "32px", borderRadius: "16px",
+            width: "100%", maxWidth: "480px", boxShadow: "0 24px 48px rgba(0,38,41,0.18)"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+              <h3 className="font-headline" style={{ fontSize: "20px", fontWeight: 800, color: colors.primary, margin: 0 }}>
+                {userRating ? "Update Review" : "Write a Review"}
+              </h3>
+              <button 
+                onClick={() => setShowReviewModal(false)}
+                style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center" }}
+              >
+                <span className="material-symbols-outlined" style={{ color: colors.onSurfaceVariant }}>close</span>
+              </button>
+            </div>
+            
+            <div style={{ marginBottom: "20px" }}>
+              <p style={{ fontSize: "14px", fontWeight: 600, color: colors.onSurfaceVariant, marginBottom: "8px" }}>Your Rating</p>
+              <div style={{ display: "flex", gap: "6px" }}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setModalRating(star)}
+                    style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
+                  >
+                    <StarIcon
+                      fillType={modalRating >= star ? "full" : "empty"}
+                      size={24}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
 
+            <div style={{ marginBottom: "24px" }}>
+              <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: colors.onSurfaceVariant, marginBottom: "8px" }}>
+                Your Review
+              </label>
+              <textarea
+                value={modalReviewText}
+                onChange={(e) => setModalReviewText(e.target.value)}
+                placeholder="What did you like or dislike about this book?"
+                style={{
+                  width: "100%", height: "120px", borderRadius: "8px", border: `1px solid ${colors.outlineVariant}`,
+                  padding: "12px", fontSize: "14px", fontFamily: "inherit", resize: "none", outline: "none"
+                }}
+                className="search-input"
+              />
+            </div>
+
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button
+                onClick={() => setShowReviewModal(false)}
+                style={{
+                  flex: 1, padding: "12px", borderRadius: "8px", fontWeight: 700, fontSize: "14px",
+                  background: colors.surfaceContainer, color: colors.primary, border: "none", cursor: "pointer"
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  // Login required to submit a review
+                  if (requireLogin()) {
+                    setShowReviewModal(false);
+                    return;
+                  }
+                  if (modalRating === 0) {
+                    toast.error("Please select a star rating");
+                    return;
+                  }
+                  try {
+                    if (userRating) {
+                      await dispatch(
+                        updateRating({
+                          id: userRating._id,
+                          data: {
+                            rating: modalRating,
+                            review: modalReviewText
+                          }
+                        })
+                      ).unwrap();
+                    } else {
+                      await dispatch(
+                        createRating({
+                          bookId: book._id,
+                          rating: modalRating,
+                          review: modalReviewText
+                        })
+                      ).unwrap();
+                    }
+                    await dispatch(getAllRating(book._id)).unwrap();
+                  } catch (err) {
+                    console.error("Failed to submit rating/review:", err);
+                  } finally {
+                    setShowReviewModal(false);
+                  }
+                }}
+                style={{
+                  flex: 1, padding: "12px", borderRadius: "8px", fontWeight: 700, fontSize: "14px",
+                  background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryContainer})`,
+                  color: "white", border: "none", cursor: "pointer"
+                }}
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

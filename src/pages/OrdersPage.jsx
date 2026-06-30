@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { cancelOrder, getAllUserOrders } from "../redux/slices/orderSlice";
+import { cancelOrder, getAllUserOrders, markOrderAsRated } from "../redux/slices/orderSlice";
+import { createRating } from "../redux/slices/ratingSlice";
+import { toast } from "react-hot-toast";
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
 const C = {
@@ -102,7 +104,7 @@ function BookThumbnails({ items }) {
 }
 
 // ─── OrderCard ────────────────────────────────────────────────────────────────
-function OrderCard({ order, onCancel }) {
+function OrderCard({ order, onCancel, onRateClick }) {
   const [expanded, setExpanded] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const navigate = useNavigate();
@@ -168,7 +170,7 @@ function OrderCard({ order, onCancel }) {
 
         {/* Right: action buttons */}
         <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
-          {status?.toUpperCase() === "DELIVERED" && (
+          {status?.toUpperCase() === "DELIVERED" && !order.isRated && (
             <button
               onClick={() => navigate(`/invoice/${orderId}`)}
               className="px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors"
@@ -177,6 +179,31 @@ function OrderCard({ order, onCancel }) {
               onMouseLeave={e => e.currentTarget.style.background = "transparent"}
             >
               Invoice
+            </button>
+          )}
+          {status?.toUpperCase() === "DELIVERED" && !order.isRated && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onRateClick(order);
+              }}
+              className="px-4 py-2.5 text-sm font-semibold rounded-lg transition-all border flex items-center gap-1.5"
+              style={{ 
+                borderColor: C.primary, 
+                color: C.primary,
+                background: "transparent"
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = C.primary;
+                e.currentTarget.style.color = "#fff";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = C.primary;
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>star</span>
+              Rate Order
             </button>
           )}
           {["PROCESSING", "SHIPPED"].includes(status?.toUpperCase()) && (
@@ -415,6 +442,9 @@ function EmptyState({ filtered }) {
 export default function OrdersPage() {
   const dispatch = useDispatch();
   const [activeFilter, setActiveFilter] = useState("All");
+  const [ratingOrder, setRatingOrder] = useState(null);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [orderRatings, setOrderRatings] = useState({});
 
   const ordersData = useSelector((state) => state.order.ordersData || []);
   const loading    = useSelector((state) => state.order.loading);
@@ -427,6 +457,66 @@ export default function OrdersPage() {
   const handleCancel = async (orderId) => {
     await dispatch(cancelOrder(orderId));
     dispatch(getAllUserOrders()); // Refresh list after cancel
+  };
+
+  const handleOpenRatingModal = (order) => {
+    setRatingOrder(order);
+    const initialRatings = {};
+    const items = order.items || order.orderItems || [];
+    items.forEach(item => {
+      const bookId = item.book?._id || item.bookId?._id || item.bookId || "";
+      initialRatings[bookId] = { rating: 0, review: "" };
+    });
+    setOrderRatings(initialRatings);
+    setShowRatingModal(true);
+  };
+
+  const handleStarClick = (bookId, star) => {
+    setOrderRatings(prev => ({
+      ...prev,
+      [bookId]: {
+        ...prev[bookId],
+        rating: star
+      }
+    }));
+  };
+
+  const handleReviewChange = (bookId, text) => {
+    setOrderRatings(prev => ({
+      ...prev,
+      [bookId]: {
+        ...prev[bookId],
+        review: text
+      }
+    }));
+  };
+
+  const handleRatingSubmit = async () => {
+    const items = ratingOrder.items || ratingOrder.orderItems || [];
+    let ratedAny = false;
+
+    for (const item of items) {
+      const bookId = item.book?._id || item.bookId?._id || item.bookId || "";
+      const ratingInfo = orderRatings[bookId];
+      if (ratingInfo && ratingInfo.rating > 0) {
+        ratedAny = true;
+        await dispatch(createRating({
+          bookId,
+          rating: ratingInfo.rating,
+          review: ratingInfo.review,
+          orderId: ratingOrder._id || ratingOrder.orderId
+        }));
+      }
+    }
+
+    if (!ratedAny) {
+      toast.error("Please rate at least one book in this order!");
+      return;
+    }
+
+    await dispatch(markOrderAsRated(ratingOrder._id || ratingOrder.orderId));
+    setShowRatingModal(false);
+    dispatch(getAllUserOrders());
   };
 
   const countByStatus = (key) =>
@@ -512,6 +602,7 @@ export default function OrdersPage() {
                   key={order._id || order.orderId || i}
                   order={order}
                   onCancel={handleCancel}
+                  onRateClick={handleOpenRatingModal}
                 />
               ))
             )}
@@ -586,6 +677,134 @@ export default function OrdersPage() {
 
         </main>
       </div>
+
+      {showRatingModal && ratingOrder && (
+        <div 
+          className="fixed inset-0 flex items-center justify-center p-4 z-50 animate-fade-in"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+        >
+          <div 
+            className="w-full max-w-lg rounded-2xl p-6 md:p-8 flex flex-col max-h-[90vh] overflow-y-auto"
+            style={{ background: C.surfaceContainerLowest, boxShadow: "0 24px 48px rgba(0,38,41,0.15)" }}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="font-extrabold text-2xl tracking-tight" style={{ fontFamily: "Manrope, sans-serif", color: C.primary }}>
+                  Rate Your Order
+                </h3>
+                <p className="text-sm" style={{ color: C.onSurfaceVariant }}>
+                  Order #{ratingOrder._id || ratingOrder.orderId}
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowRatingModal(false)}
+                className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+                style={{ background: C.surfaceContainer, color: C.onSurfaceVariant }}
+                onMouseEnter={e => e.currentTarget.style.background = C.surfaceContainerHigh}
+                onMouseLeave={e => e.currentTarget.style.background = C.surfaceContainer}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>close</span>
+              </button>
+            </div>
+
+            <div className="space-y-6 flex-grow overflow-y-auto mb-6 pr-1">
+              {(ratingOrder.items || ratingOrder.orderItems || []).map((item, i) => {
+                const book = item.book || {};
+                const bookId = book._id || item.bookId?._id || item.bookId || "";
+                const cover = book.cover_image || book.cover || "";
+                const title = book.title || item.title || "Book";
+                const author = book.author || item.author || "";
+
+                return (
+                  <div key={i} className="pb-6 border-b last:border-b-0 last:pb-0" style={{ borderColor: `${C.outlineVariant}20` }}>
+                    <div className="flex gap-4 items-start mb-4">
+                      <div className="w-12 h-16 rounded-md overflow-hidden flex-shrink-0" style={{ background: C.surfaceContainerHigh }}>
+                        {cover ? (
+                          <img src={cover} alt={title} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="material-symbols-outlined" style={{ fontSize: 18, color: C.outlineVariant }}>menu_book</span>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm" style={{ color: C.primary }}>{title}</h4>
+                        {author && <p className="text-xs" style={{ color: C.onSurfaceVariant }}>{author}</p>}
+                      </div>
+                    </div>
+
+                    <div className="mb-3">
+                      <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: C.onSurfaceVariant }}>Rating</p>
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map(star => {
+                          const bookRating = orderRatings[bookId]?.rating || 0;
+                          const isFilled = star <= bookRating;
+                          return (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => handleStarClick(bookId, star)}
+                              className="p-0.5 active:scale-90 transition-transform"
+                            >
+                              <span 
+                                className="material-symbols-outlined" 
+                                style={{ 
+                                  fontSize: 26, 
+                                  color: isFilled ? "#f59e0b" : C.outlineVariant,
+                                  fontVariationSettings: isFilled ? "'FILL' 1" : "'FILL' 0"
+                                }}
+                              >
+                                star
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: C.onSurfaceVariant }}>Review</p>
+                      <textarea
+                        value={orderRatings[bookId]?.review || ""}
+                        onChange={(e) => handleReviewChange(bookId, e.target.value)}
+                        placeholder="Write a brief review about this book..."
+                        className="w-full text-sm rounded-lg p-3 outline-none transition-shadow"
+                        style={{ 
+                          height: 70, 
+                          resize: "none", 
+                          background: C.surfaceContainerLow, 
+                          border: `1px solid ${C.outlineVariant}50` 
+                        }}
+                        onFocus={e => e.currentTarget.style.boxShadow = `0 0 0 2px ${C.primary}30`}
+                        onBlur={e => e.currentTarget.style.boxShadow = "none"}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowRatingModal(false)}
+                className="flex-1 py-3 text-sm font-bold rounded-xl transition-colors"
+                style={{ background: C.surfaceContainer, color: C.primary }}
+                onMouseEnter={e => e.currentTarget.style.background = C.surfaceContainerHigh}
+                onMouseLeave={e => e.currentTarget.style.background = C.surfaceContainer}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRatingSubmit}
+                className="flex-1 py-3 text-sm font-bold text-white rounded-xl active:scale-95 transition-all"
+                style={{ background: `linear-gradient(135deg, ${C.primary}, ${C.primaryContainer})` }}
+              >
+                Submit Ratings
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

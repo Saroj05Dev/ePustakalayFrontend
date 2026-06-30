@@ -102,6 +102,27 @@ export const cancelOrder = createAsyncThunk(
   },
 );
 
+export const markOrderAsRated = createAsyncThunk(
+  "/orders/markOrderAsRated",
+  async (orderId) => {
+    try {
+      const response = axiosInstance.put(`/orders/${orderId}/rate`);
+      toast.promise(response, {
+        loading: "Submitting order rating...",
+        success: "Order rated successfully!",
+        error: (err) =>
+          err?.response?.data?.message || "Failed to rate order",
+      });
+      const apiResponse = await response;
+      return apiResponse;
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong");
+      throw error;
+    }
+  },
+);
+
 export const deleteOrder = createAsyncThunk(
   "/orders/deleteOrder",
   async (orderId) => {
@@ -182,6 +203,15 @@ const orderSlice = createSlice({
         if (cancelledOrder) {
           state.ordersData = state.ordersData.map((order) =>
             order._id === cancelledOrder._id ? cancelledOrder : order,
+          );
+        }
+      })
+      .addCase(markOrderAsRated.fulfilled, (state, action) => {
+        const ratedOrder =
+          action?.payload?.data?.data || action?.payload?.data;
+        if (ratedOrder) {
+          state.ordersData = state.ordersData.map((order) =>
+            order._id === ratedOrder._id ? ratedOrder : order,
           );
         }
       })
