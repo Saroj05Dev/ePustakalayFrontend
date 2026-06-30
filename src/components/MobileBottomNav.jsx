@@ -24,7 +24,7 @@ export default function MobileBottomNav() {
     { name: "Home",    path: "/",         icon: Home,        end: true              },
     { name: "Books",   path: "/books",    icon: BookOpen                            },
     { name: "Wishlist",path: "/wishlist", icon: Heart,       badge: wishlistCount   },
-    { name: "Orders",  path: "/orders",   icon: ReceiptText                         },
+    ...(isLoggedIn ? [{ name: "Orders",  path: "/orders",   icon: ReceiptText }] : []),
   ];
 
   return (

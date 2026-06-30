@@ -93,9 +93,11 @@ export default function Navbar() {
               </NavLink>
 
               {/* My Orders — desktop */}
-              <NavLink to="/orders" className={linkStyles}>
-                My Orders
-              </NavLink>
+              {isLoggedIn && (
+                <NavLink to="/orders" className={linkStyles}>
+                  My Orders
+                </NavLink>
+              )}
 
               <NavLink to="/wishlist" className="relative">
                 {({ isActive }) => (
@@ -315,25 +317,27 @@ export default function Navbar() {
           </NavLink>
 
           {/* Orders ← replaces Logout */}
-          <NavLink
-            to="/orders"
-            className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 active:scale-90 ${
-                isActive
-                  ? "text-[#002629] bg-[#002629]/[0.06]"
-                  : "text-slate-400 hover:text-[#002629]"
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <ReceiptText size={22} strokeWidth={isActive ? 2.2 : 1.7} />
-                <span className="text-[10px] font-semibold uppercase tracking-wider">
-                  Orders
-                </span>
-              </>
-            )}
-          </NavLink>
+          {isLoggedIn && (
+            <NavLink
+              to="/orders"
+              className={({ isActive }) =>
+                `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 active:scale-90 ${
+                  isActive
+                    ? "text-[#002629] bg-[#002629]/[0.06]"
+                    : "text-slate-400 hover:text-[#002629]"
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <ReceiptText size={22} strokeWidth={isActive ? 2.2 : 1.7} />
+                  <span className="text-[10px] font-semibold uppercase tracking-wider">
+                    Orders
+                  </span>
+                </>
+              )}
+            </NavLink>
+          )}
         </div>
       </nav>
 

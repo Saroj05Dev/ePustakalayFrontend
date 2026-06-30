@@ -5,6 +5,19 @@ const axiosInstance = axios.create();
 axiosInstance.defaults.baseURL = import.meta.env.VITE_BACKEND_URL; 
 console.log("Backend URL:", import.meta.env.VITE_BACKEND_URL);
 
+// ── Public endpoints jahan 401 par redirect NAHI karna ──────────────
+// (ye routes bina login ke bhi accessible hain)
+const PUBLIC_ENDPOINTS = [
+  "/users/login",
+  "/users/register",
+  "/books",
+  "/ratings",
+  "/categories",
+];
+
+const isPublicEndpoint = (url = "") =>
+  PUBLIC_ENDPOINTS.some((path) => url.includes(path));
+
 // ── Request: attach token from localStorage ──────────────────────
 axiosInstance.interceptors.request.use(
     (config) => {
@@ -24,16 +37,16 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Check karein kya error login endpoint se aa rahi hai
-        const isLoginAPI = error?.config?.url?.includes("/users/login");
+        const requestUrl = error?.config?.url || "";
+
+        // Public endpoints par 401 aaye toh redirect MAT karo
+        // (jaise ratings, books — bina login ke bhi dekh sakte hain)
+        if (isPublicEndpoint(requestUrl)) {
+            return Promise.reject(error);
+        }
 
         if (error?.response?.status === 401) {
-            // Agar LOGIN API par 401 aaya hai (Invalid credentials), toh reload MAT karo
-            if (isLoginAPI) {
-                return Promise.reject(error);
-            }
-
-            // Kisi aur route (jaise dashboard, profile) par 401 aaye tabhi redirect karo
+            // Kisi protected route par 401 aaye tabhi redirect karo
             console.warn("[Axios] 401 Unauthorized — clearing token");
             localStorage.removeItem("token");
             
@@ -46,4 +59,4 @@ axiosInstance.interceptors.response.use(
     }
 );
 
-export default axiosInstance;
+export default axiosInstance;
