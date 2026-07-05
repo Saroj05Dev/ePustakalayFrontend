@@ -30,7 +30,6 @@ export const createRating = createAsyncThunk(
             const response = await responsePromise;
             return response.data;
         } catch (error) {
-            console.log(error);
             return rejectWithValue(
                 error?.response?.data || "Something went wrong"
             );
@@ -46,7 +45,6 @@ export const getAllRating = createAsyncThunk(
             const response = await axiosInstance.get(`/ratings/${bookId}`);
             return response.data;
         } catch (error) {
-            console.log(error);
             // No toast here — guest users get 401 silently (it's a public page)
             return rejectWithValue(
                 error?.response?.data || "Something went wrong"
@@ -76,7 +74,6 @@ export const updateRating = createAsyncThunk(
             const response = await responsePromise;
             return response.data;
         } catch (error) {
-            console.log(error);
             return rejectWithValue(
                 error?.response?.data || "Something went wrong"
             );
@@ -102,7 +99,6 @@ export const deleteRating = createAsyncThunk(
             const response = await responsePromise;
             return { id, data: response.data };
         } catch (error) {
-            console.log(error);
             return rejectWithValue(
                 error?.response?.data || "Something went wrong"
             );

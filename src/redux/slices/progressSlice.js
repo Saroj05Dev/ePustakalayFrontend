@@ -15,7 +15,6 @@ export const createReadingProgress = createAsyncThunk(
             const response = await axiosInstance.post("/progress", data);
             return response;
         } catch (error) {
-            console.log(error);
         }
     }
 );
@@ -28,7 +27,6 @@ export const getBookProgress = createAsyncThunk(
             const apiResponse = await axiosInstance.get(`/progress/${bookId}`);
             return apiResponse;
         } catch (error) {
-            console.log(error);
         }
     }
 );
@@ -41,7 +39,6 @@ export const updateReadingProgress = createAsyncThunk(
             const response = await axiosInstance.put(`/progress/${progressId}`, data);
             return response;
         } catch (error) {
-            console.log(error);
         }
     }
 );

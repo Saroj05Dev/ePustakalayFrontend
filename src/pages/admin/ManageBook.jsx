@@ -189,7 +189,10 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
     selectedBookId: '',
     chapterName: '',
     chapterNumber: '1',
-    context: 'Introduction context here...',
+    description: '',
+    start_page: '',
+    end_page: '',
+    duration_minutes: '',
   };
   const [chapterData, setChapterData] = useState(emptyChapter);
 
@@ -390,11 +393,19 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
 
   const handleAddChapterSubmit = (e) => {
     e.preventDefault();
+    
+    // Calculate duration if not provided (2 minutes per page)
+    const pageCount = Number(chapterData.end_page) - Number(chapterData.start_page) + 1;
+    const duration = chapterData.duration_minutes || Math.ceil(pageCount * 2);
+    
     dispatch(createChapter({
       book: chapterData.selectedBookId,
       chapter_title: chapterData.chapterName,
       chapter_number: Number(chapterData.chapterNumber),
-      context: chapterData.context,
+      description: chapterData.description || '',
+      start_page: Number(chapterData.start_page),
+      end_page: Number(chapterData.end_page),
+      duration_minutes: duration,
     }));
     setModal(null);
     setChapterData(emptyChapter);
@@ -407,12 +418,20 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
 
   const handleUpdateChapter = (e) => {
     e.preventDefault();
+    
+    // Calculate duration if not provided (2 minutes per page)
+    const pageCount = Number(editingChapter.end_page) - Number(editingChapter.start_page) + 1;
+    const duration = editingChapter.duration_minutes || Math.ceil(pageCount * 2);
+    
     dispatch(updateChapter({
       chapterId: editingChapter._id,
       data: {
         chapter_title: editingChapter.chapter_title,
         chapter_number: Number(editingChapter.chapter_number),
-        context: editingChapter.context,
+        description: editingChapter.description || '',
+        start_page: Number(editingChapter.start_page),
+        end_page: Number(editingChapter.end_page),
+        duration_minutes: duration,
       }
     }));
     setModal('showChapters');
@@ -427,7 +446,7 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
   );
   const filteredChapters = reduxChapters.filter(c =>
     c.chapter_title.toLowerCase().includes(chapterSearch.toLowerCase()) ||
-    (c.context && c.context.toLowerCase().includes(chapterSearch.toLowerCase()))
+    (c.description && c.description.toLowerCase().includes(chapterSearch.toLowerCase()))
   );
 
 
@@ -854,9 +873,36 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
                       onChange={e => setChapterData({ ...chapterData, chapterName: e.target.value })} />
                   </div>
                 </div>
-                <FormInput label="Context/Details" required placeholder="Chapter details/context (at least 5 characters)"
-                  value={chapterData.context}
-                  onChange={e => setChapterData({ ...chapterData, context: e.target.value })} />
+                
+                {/* Description */}
+                <div className="mb-3">
+                  <FormInput label="Description" placeholder="Brief chapter summary (optional)"
+                    value={chapterData.description}
+                    onChange={e => setChapterData({ ...chapterData, description: e.target.value })} />
+                </div>
+                
+                {/* Page Range */}
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <FormInput label="Start Page" required type="number" min="1"
+                    placeholder="e.g. 1"
+                    value={chapterData.start_page}
+                    onChange={e => setChapterData({ ...chapterData, start_page: e.target.value })} />
+                  <FormInput label="End Page" required type="number" min="1"
+                    placeholder="e.g. 50"
+                    value={chapterData.end_page}
+                    onChange={e => setChapterData({ ...chapterData, end_page: e.target.value })} />
+                </div>
+                
+                {/* Duration (Optional) */}
+                <div>
+                  <FormInput label="Duration (minutes)" type="number" min="1"
+                    placeholder="Auto-calculated if left empty"
+                    value={chapterData.duration_minutes}
+                    onChange={e => setChapterData({ ...chapterData, duration_minutes: e.target.value })} />
+                  <p className="text-[10px] text-slate-400 font-semibold mt-1">
+                    💡 Leave empty to auto-calculate based on page count (2 min/page)
+                  </p>
+                </div>
               </div>
             </div>
             <ModalFooter onCancel={() => setModal(null)} submitLabel="Save Chapter" />
@@ -924,7 +970,7 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
                               </span>
                             </div>
                             <p className="text-[10px] text-slate-400 font-semibold mt-1 ml-8 truncate">
-                              📖 {bookObj?.title || 'Selected Book'} · {chapter.context || 'No context'}
+                              📖 {bookObj?.title || 'Selected Book'} · Pages {chapter.start_page || '?'}-{chapter.end_page || '?'} ({chapter.duration_minutes || 'N/A'} min)
                             </p>
                           </div>
                           <div className="flex items-center gap-1.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -998,9 +1044,31 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
                 </div>
               </div>
 
-              <FormInput label="Context/Details" required
-                value={editingChapter.context}
-                onChange={e => setEditingChapter({ ...editingChapter, context: e.target.value })} />
+              {/* Description */}
+              <FormInput label="Description" placeholder="Brief chapter summary"
+                value={editingChapter.description || ''}
+                onChange={e => setEditingChapter({ ...editingChapter, description: e.target.value })} />
+              
+              {/* Page Range */}
+              <div className="grid grid-cols-2 gap-3">
+                <FormInput label="Start Page" required type="number" min="1"
+                  value={editingChapter.start_page || ''}
+                  onChange={e => setEditingChapter({ ...editingChapter, start_page: e.target.value })} />
+                <FormInput label="End Page" required type="number" min="1"
+                  value={editingChapter.end_page || ''}
+                  onChange={e => setEditingChapter({ ...editingChapter, end_page: e.target.value })} />
+              </div>
+              
+              {/* Duration */}
+              <div>
+                <FormInput label="Duration (minutes)" type="number" min="1"
+                  placeholder="Auto-calculated if left empty"
+                  value={editingChapter.duration_minutes || ''}
+                  onChange={e => setEditingChapter({ ...editingChapter, duration_minutes: e.target.value })} />
+                <p className="text-[10px] text-slate-400 font-semibold mt-1">
+                  💡 Leave empty to auto-calculate based on page count (2 min/page)
+                </p>
+              </div>
             </div>
             <ModalFooter onCancel={() => setModal('showChapters')} submitLabel="Update Chapter" />
           </form>

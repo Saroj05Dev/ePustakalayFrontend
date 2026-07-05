@@ -2,14 +2,14 @@ import axios from "axios";
 
 const axiosInstance = axios.create(); 
 
-axiosInstance.defaults.baseURL = import.meta.env.VITE_BACKEND_URL; 
-console.log("Backend URL:", import.meta.env.VITE_BACKEND_URL);
+axiosInstance.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 
 // ── Public endpoints jahan 401 par redirect NAHI karna ──────────────
 // (ye routes bina login ke bhi accessible hain)
 const PUBLIC_ENDPOINTS = [
   "/users/login",
   "/users/register",
+  "/users/me",  // Auth check - shouldn't redirect on 401
   "/books",
   "/ratings",
   "/categories",
@@ -25,7 +25,6 @@ axiosInstance.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
-        console.log("[Axios]", config.method?.toUpperCase(), config.url, "| token:", token ? "present" : "MISSING");
         return config;
     },
     (error) => {
@@ -47,7 +46,6 @@ axiosInstance.interceptors.response.use(
 
         if (error?.response?.status === 401) {
             // Kisi protected route par 401 aaye tabhi redirect karo
-            console.warn("[Axios] 401 Unauthorized — clearing token");
             localStorage.removeItem("token");
             
             // Sirf tab redirect karein jab hum pehle se login page par na hon
@@ -59,4 +57,4 @@ axiosInstance.interceptors.response.use(
     }
 );
 
-export default axiosInstance;
+export default axiosInstance;

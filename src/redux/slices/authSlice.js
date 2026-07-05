@@ -28,7 +28,6 @@ export const registerUser = createAsyncThunk(
             const apiResponse = await response;
             return apiResponse;
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }
@@ -45,7 +44,6 @@ export const loginUser = createAsyncThunk(
             // Hamesha response ka direct data return karein taaki payload structure predictable rahe
             return response.data; 
         } catch (error) {
-            console.error(error);
             // Agar backend custom message bhej raha hai to use pass karein
             const errorMessage = error?.response?.data?.message || error?.response?.data || error.message;
             return thunkAPI.rejectWithValue(errorMessage);
@@ -62,7 +60,6 @@ export const getMe = createAsyncThunk(
             const apiResponse = await response;
             return apiResponse;
         } catch (error) {
-            console.log(error);
             toast.error("Failed to fetch profile");
         }
     }
@@ -75,7 +72,6 @@ export const getAllUsers = createAsyncThunk(
             const apiResponse = await axiosInstance.get("/users");
             return apiResponse;
         } catch (error) {
-            console.log(error);
         }
     }
 );
@@ -97,7 +93,6 @@ export const updateUser = createAsyncThunk(
             const apiResponse = await response;
             return apiResponse;
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }
@@ -123,7 +118,6 @@ export const deleteUser = createAsyncThunk(
                 response: apiResponse,
             };
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }
@@ -163,10 +157,6 @@ const authSlice = createSlice({
                     payload?.user ||
                     payload?.userData ||
                     payload;
-
-                console.log("[Auth] login response payload:", payload);
-                console.log("[Auth] extracted token:", token);
-                console.log("[Auth] extracted user:", userData);
 
                 if (token) {
                     localStorage.setItem("token", token);

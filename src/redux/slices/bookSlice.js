@@ -9,7 +9,6 @@ const initialState = {
 export const createBook = createAsyncThunk(
     "/books/createBook",
     async (data) => {
-        console.log("incoming createBook data to the thunk", data);
 
         try {
             const formData = new FormData();
@@ -48,7 +47,6 @@ export const createBook = createAsyncThunk(
             const apiResponse = await response;
             return apiResponse;
         } catch (error) {
-            console.log(error);
             toast.error(error?.response?.data?.message || "Something went wrong");
         }
     }
@@ -62,7 +60,6 @@ export const getAllBooks = createAsyncThunk(
             const apiResponse = await axiosInstance.get("/books/");
             return apiResponse.data;
         } catch (error) {
-            console.log(error);
         }
     }
 );
@@ -107,7 +104,6 @@ export const updateBook = createAsyncThunk(
             const apiResponse = await response;
             return apiResponse;
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }
@@ -133,7 +129,6 @@ export const deleteBook = createAsyncThunk(
                 response: apiResponse,
             };
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }

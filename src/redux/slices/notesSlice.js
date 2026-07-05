@@ -20,7 +20,6 @@ export const createNote = createAsyncThunk(
             });
             return await response;
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }
@@ -34,7 +33,6 @@ export const getAllNotes = createAsyncThunk(
             const apiResponse = await axiosInstance.get("/notes");
             return apiResponse;
         } catch (error) {
-            console.log(error);
         }
     }
 );
@@ -49,7 +47,6 @@ export const getNotesByBookAndChapter = createAsyncThunk(
             );
             return apiResponse;
         } catch (error) {
-            console.log(error);
         }
     }
 );
@@ -67,7 +64,6 @@ export const updateNote = createAsyncThunk(
             });
             return await response;
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }
@@ -87,7 +83,6 @@ export const deleteNote = createAsyncThunk(
             await response;
             return noteId;
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }

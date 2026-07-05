@@ -15,7 +15,6 @@ export const getAllOrders = createAsyncThunk(
       const apiResponse = await axiosInstance.get("/orders/all");
       return apiResponse;
     } catch (error) {
-      console.log(error);
       toast.error(error?.response?.data?.message || "Failed to fetch orders");
       throw error;
     }
@@ -29,7 +28,6 @@ export const getAllUserOrders = createAsyncThunk(
       const apiResponse = await axiosInstance.get("/orders");
       return apiResponse;
     } catch (error) {
-      console.log(error);
       toast.error(error?.response?.data?.message || "Failed to fetch orders");
       throw error;
     }
@@ -51,7 +49,6 @@ export const createOrder = createAsyncThunk(
       const apiResponse = await response;
       return apiResponse;
     } catch (error) {
-      console.log(error);
       toast.error("Something went wrong");
       throw error;
     }
@@ -74,7 +71,6 @@ export const updateOrderStatus = createAsyncThunk(
       const apiResponse = await response;
       return apiResponse;
     } catch (error) {
-      console.log(error);
       toast.error("Something went wrong");
       throw error;
     }
@@ -95,7 +91,6 @@ export const cancelOrder = createAsyncThunk(
       const apiResponse = await response;
       return apiResponse;
     } catch (error) {
-      console.log(error);
       toast.error("Something went wrong");
       throw error;
     }
@@ -116,7 +111,6 @@ export const markOrderAsRated = createAsyncThunk(
       const apiResponse = await response;
       return apiResponse;
     } catch (error) {
-      console.log(error);
       toast.error("Something went wrong");
       throw error;
     }
@@ -137,7 +131,6 @@ export const deleteOrder = createAsyncThunk(
       const apiResponse = await response;
       return { orderId, response: apiResponse };
     } catch (error) {
-      console.log(error);
       toast.error("Something went wrong");
       throw error;
     }

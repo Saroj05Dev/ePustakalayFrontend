@@ -116,7 +116,6 @@ export default function SignupPage() {
         toast.error(errorMsg, { position: "top-center" });
       }
     } catch (err) {
-      console.error(err);
       toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);

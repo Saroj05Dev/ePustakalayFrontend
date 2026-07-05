@@ -101,7 +101,6 @@ export default function LoginPage() {
         toast.error(errorMessage, { duration: 4000, position: "top-center" });
       }
     } catch (err) {
-      console.error("Login component caught a crash error: ", err);
       toast.error("Something went wrong. Please try again.", { duration: 4000 });
     } finally {
       setLoading(false);

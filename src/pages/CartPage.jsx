@@ -459,7 +459,6 @@ export default function CartPage() {
         try {
           dispatch(setGuestCart(JSON.parse(guestCart)));
         } catch (e) {
-          console.error(e);
         }
       }
     }

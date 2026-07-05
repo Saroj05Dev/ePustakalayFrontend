@@ -28,7 +28,6 @@ export const createCategory = createAsyncThunk(
             const apiResponse = await response;
             return apiResponse;
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }
@@ -41,7 +40,6 @@ export const getAllCategories = createAsyncThunk(
             const apiResponse = await axiosInstance.get("/categories");
             return apiResponse;
         } catch (error) {
-            console.log(error);
         }
     }
 );
@@ -66,7 +64,6 @@ export const updateCategory = createAsyncThunk(
             const apiResponse = await response;
             return apiResponse;
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }
@@ -94,7 +91,6 @@ export const deleteCategory = createAsyncThunk(
                 response: apiResponse,
             };
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }

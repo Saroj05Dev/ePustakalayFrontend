@@ -20,7 +20,6 @@ export const createHighlight = createAsyncThunk(
             });
             return await response;
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }
@@ -34,7 +33,6 @@ export const getHighlightsByChapter = createAsyncThunk(
             const apiResponse = await axiosInstance.get(`/highlights/book/${bookId}/chapter/${chapterId}`);
             return apiResponse;
         } catch (error) {
-            console.log(error);
         }
     }
 );
@@ -53,7 +51,6 @@ export const deleteHighlight = createAsyncThunk(
             await response;
             return highlightId;
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }

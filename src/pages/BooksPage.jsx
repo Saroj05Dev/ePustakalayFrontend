@@ -206,7 +206,6 @@ export default function EPustakalay() {
         try {
           dispatch(setGuestCart(JSON.parse(guestCart)));
         } catch (err) {
-          console.error(err);
         }
       }
     }

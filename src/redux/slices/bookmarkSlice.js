@@ -21,7 +21,6 @@ export const createBookmark = createAsyncThunk(
             });
             return await response;
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }
@@ -35,7 +34,6 @@ export const getAllBookmarks = createAsyncThunk(
             const apiResponse = await axiosInstance.get("/bookmarks");
             return apiResponse;
         } catch (error) {
-            console.log(error);
         }
     }
 );
@@ -51,7 +49,6 @@ export const getBookmarkByBook = createAsyncThunk(
             if (error?.response?.status === 404) {
                 return null;
             }
-            console.log(error);
             return rejectWithValue(error?.response?.data);
         }
     }
@@ -71,7 +68,6 @@ export const deleteBookmark = createAsyncThunk(
             await response;
             return bookmarkId;
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }

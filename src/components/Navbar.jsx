@@ -20,15 +20,14 @@ export default function Navbar() {
 
   const { isLoggedIn } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart?.cartData || []);
-  const cartCount = cartItems.reduce(
-    (acc, item) => acc + (item.quantity || 1),
-    0,
-  );
+  const cartCount = cartItems
+    .filter(item => item != null) // Filter out null/undefined items
+    .reduce((acc, item) => acc + (item?.quantity || 1), 0);
 
   const wishlistItems = useSelector(
     (state) => state.wishlist?.wishlistData || [],
   );
-  const wishlistCount = wishlistItems.length;
+  const wishlistCount = wishlistItems.filter(item => item != null).length;
 
   const [localSearch, setLocalSearch] = useState("");
   const [showMobileSearch, setShowMobileSearch] = useState(false);

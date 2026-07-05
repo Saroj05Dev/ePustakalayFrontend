@@ -14,7 +14,6 @@ export const getCart = createAsyncThunk(
       const response = await axiosInstance.get("/cart");
       return response;
     } catch (error) {
-      console.log(error);
     }
   }
 );
@@ -31,7 +30,6 @@ export const addToCart = createAsyncThunk(
 
       return await response;
     } catch (error) {
-      console.log(error);
       toast.error("Something went wrong");
     }
   }
@@ -47,12 +45,9 @@ export const updateCartItem = createAsyncThunk(
         { quantity }
       );
 
-      console.log("UPDATE RESPONSE", response.data);
-
       return response;
 
     } catch (error) {
-      console.log(error);
     }
   }
 );
@@ -74,7 +69,6 @@ export const removeCartItem = createAsyncThunk(
       await response;
       return cartItemId;
     } catch (error) {
-      console.log(error);
     }
   }
 );

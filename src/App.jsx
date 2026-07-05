@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getCart, setGuestCart } from "./redux/slices/cartSlice";
 
+import ReadBookPage from "./pages/ReadBookPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/auth/Login";
 import SignupPage from "./pages/auth/Signup";
@@ -52,7 +53,6 @@ function App() {
           try {
             dispatch(setGuestCart(JSON.parse(guestCart)));
           } catch (e) {
-            console.error(e);
           }
         }
       }
@@ -108,6 +108,15 @@ function App() {
            path="/books/:id/chapters"
            element={
              <PublicLayout><ChapterPage /></PublicLayout>
+           }
+         />
+
+         <Route
+           path="/books/:id/read"
+           element={
+             <ProtectedRoute allowedRoles={["user", "admin", "seller"]}>
+               <ReadBookPage />
+             </ProtectedRoute>
            }
          />
 

@@ -224,7 +224,8 @@ export default function ChapterPage() {
       navigate("/login", { state: { from: location.pathname } });
       return;
     }
-    navigate(`/books/${id}/chapters/${chapter._id}/notes`);
+    // Go directly to reading the book at this chapter's page
+    navigate(`/books/${id}/read?page=${chapter.start_page || 1}`);
   };
 
   // Loading

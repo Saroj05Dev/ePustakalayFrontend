@@ -28,7 +28,6 @@ export const createChapter = createAsyncThunk(
             const apiResponse = await response;
             return apiResponse;
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }
@@ -41,7 +40,6 @@ export const getChapterById = createAsyncThunk(
             const apiResponse = await axiosInstance.get(`/chapters/${chapterId}`);
             return apiResponse;
         } catch (error) {
-            console.log(error);
         }
     }
 );
@@ -53,7 +51,6 @@ export const getChaptersByBook = createAsyncThunk(
             const apiResponse = await axiosInstance.get(`/chapters/book/${bookId}`);
             return apiResponse;
         } catch (error) {
-            console.log(error);
         }
     }
 );
@@ -78,7 +75,6 @@ export const updateChapter = createAsyncThunk(
             const apiResponse = await response;
             return apiResponse;
         } catch (error) {
-            console.log(error);
             toast.error("Something went wrong");
         }
     }

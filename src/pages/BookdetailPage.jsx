@@ -209,15 +209,19 @@ export default function BookdetailPage() {
 
 
   // 3. Determine if this specific book is already added to cart
-  const isAlreadyInCart = cartData.some((item) => {
-    const cartBookId = item.book && typeof item.book === "object" ? item.book._id : item.book;
-    return cartBookId === book?._id;
-  });
+  const isAlreadyInCart = cartData
+    .filter(item => item != null) // Filter out null items
+    .some((item) => {
+      const cartBookId = item.book && typeof item.book === "object" ? item.book._id : item.book;
+      return cartBookId === book?._id;
+    });
 
-  const isWishlisted = wishlistData.some((item) => {
-    const wishlistBookId = item.book && typeof item.book === "object" ? item.book._id : item.book;
-    return wishlistBookId === book?._id;
-  });
+  const isWishlisted = wishlistData
+    .filter(item => item != null) // Filter out null items
+    .some((item) => {
+      const wishlistBookId = item.book && typeof item.book === "object" ? item.book._id : item.book;
+      return wishlistBookId === book?._id;
+    });
 
 
   // Redirect to login only after auth check is complete and user is not logged in
@@ -445,7 +449,7 @@ export default function BookdetailPage() {
               </button>
             </div>
 
-            {/* Read Now Button */}
+            {/* Read Now Button - Single unified button */}
             <button
               className="btn-scale font-headline read-now-btn"
               onClick={() => navigate(`/books/${id}/chapters`)}
@@ -698,7 +702,6 @@ export default function BookdetailPage() {
                     }
                     await dispatch(getAllRating(book._id)).unwrap();
                   } catch (err) {
-                    console.error("Failed to submit rating/review:", err);
                   } finally {
                     setShowReviewModal(false);
                   }
