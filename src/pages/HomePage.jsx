@@ -138,7 +138,7 @@ function BookCard({ book, isInWishlist, onWishlistToggle }) {
           alt={book.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        
+
         {/* Wishlist Heart Icon */}
         <button
           onClick={handleWishlistClick}
@@ -150,7 +150,7 @@ function BookCard({ book, isInWishlist, onWishlistToggle }) {
           }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill={isInWishlist ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
         </button>
       </div>
@@ -360,21 +360,22 @@ export default function HomePage() {
             </div>
 
             {/* Right — hero image */}
-            <div className="relative h-[300px] md:h-[400px] xl:h-[600px] hidden lg:block">
-              <div className="absolute inset-0 bg-[#e5e8ee] rounded-4xl rotate-3"></div>
+            <div className="relative h-[300px] md:h-[400px] xl:h-[600px] block">
+              <div className="absolute inset-0 bg-[#e5e8ee] rounded-4xl rotate-3 overflow-hidden"></div>
               <img
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiJXHShr7dXIMwT7fsFt_Jjl_WeG7yXhzSS-KTx3HtHe4391t2IFMgxFDbIkgn2B-p_w1a22wTGxSQMPRK8kxaGJQzzLYs4IllU65e_ULFtnCX06WTioDPQdqaihReDlEsG0CB0ZwmzzR11Z7I4jnLq4k5DS9xfQu-7Fj45y5lX3EXjpznhyYvkHwgxrewIYm_ZsVEtRemyHpxK2hVSwb98acNxjkVcsChZdZcijRvxPWlHKyi93sT0LLpsw8l413jWClh5K3Mdg"
-                className="relative rounded-4xl h-150 w-full object-cover shadow-2xl"
+                className="relative rounded-4xl h-full lg:h-150 w-full object-cover shadow-2xl"
                 alt="Curator reading"
               />
               {/* Floating card */}
-              <div className="absolute -bottom-8 -left-8 bg-white p-5 rounded-2xl shadow-xl shadow-black/5 flex gap-4 max-w-xs items-center">
-                <div className="w-12 h-12 bg-[#ffdbc9] rounded-full flex items-center justify-center text-[#381905] flex-shrink-0">
+
+              <div className="absolute -bottom-4 left-2 sm:-left-8 bg-white p-5 rounded-2xl shadow-xl shadow-black/5 flex gap-4 max-w-xs items-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#ffdbc9] rounded-full flex items-center justify-center text-[#381905] flex-shrink-0">
                   <BookIcon />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-[#181c20]">Daily Reading Goal</p>
-                  <p className="text-xs text-[#404849]">You've completed 75% of today's target.</p>
+                  <p className="text-xs sm:text-sm font-bold text-[#181c20] whitespace-nowrap">Daily Reading Goal</p>
+                  <p className="text-[10px] sm:text-xs text-[#404849] leading-tight">You've completed 75% of today's target.</p>
                 </div>
               </div>
             </div>
@@ -463,9 +464,9 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {displayBooks.map((book) => (
-              <BookCard 
-                key={book.id} 
-                book={book} 
+              <BookCard
+                key={book.id}
+                book={book}
                 isInWishlist={isBookInWishlist(book.id)}
                 onWishlistToggle={handleWishlistToggle}
               />
