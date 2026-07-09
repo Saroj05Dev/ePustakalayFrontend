@@ -53,14 +53,15 @@ export const loginUser = createAsyncThunk(
 
 export const getMe = createAsyncThunk(
     "/auth/me",
-    async () => {
+    async (_, thunkAPI) => {
         try {
-            const response = axiosInstance.get("/users/me");
-
-            const apiResponse = await response;
-            return apiResponse;
+            const response = await axiosInstance.get("/users/me");
+            return response;
         } catch (error) {
-            toast.error("Failed to fetch profile");
+            // Token invalid/expired — silently clear auth (no toast on page load)
+            return thunkAPI.rejectWithValue(
+                error?.response?.data?.message || "Session expired"
+            );
         }
     }
 );
