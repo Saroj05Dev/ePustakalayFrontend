@@ -51,8 +51,8 @@ const Modal = ({ onClose, children }) => (
     style={{ animation: 'modalFadeIn 0.2s ease' }}
   >
     <div
-      className="bg-white w-full max-w-lg rounded-3xl border border-slate-200/80 shadow-2xl overflow-hidden"
-      style={{ animation: 'modalZoomIn 0.2s ease' }}
+      className="bg-white w-full max-w-lg rounded-3xl border border-slate-200/80 shadow-2xl flex flex-col overflow-hidden"
+      style={{ animation: 'modalZoomIn 0.2s ease', maxHeight: '90vh' }}
     >
       {children}
     </div>
@@ -647,8 +647,8 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
       {modal === 'addBook' && (
         <Modal onClose={() => setModal(null)}>
           <ModalHeader icon={Book} title="Add New Book" onClose={() => setModal(null)} />
-          <form onSubmit={handleAddBookSubmit}>
-            <div className="p-6 space-y-4 text-xs font-sans">
+          <form onSubmit={handleAddBookSubmit} className="flex flex-col flex-1 min-h-0">
+            <div className="p-6 space-y-4 text-xs font-sans overflow-y-auto flex-1">
               <FormInput label="Book Title" name="title" required placeholder="e.g. The Silent Patient"
                 value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
               <FormInput label="Author Name" name="author" required placeholder="e.g. Alex Michaelides"
@@ -692,8 +692,8 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
       {modal === 'editBook' && editingBook && (
         <Modal onClose={() => { setModal(null); setEditingBook(null); }}>
           <ModalHeader icon={Book} title="Edit Book" onClose={() => { setModal(null); setEditingBook(null); }} />
-          <form onSubmit={handleEditBookSubmit}>
-            <div className="p-6 space-y-4 text-xs font-sans">
+          <form onSubmit={handleEditBookSubmit} className="flex flex-col flex-1 min-h-0">
+            <div className="p-6 space-y-4 text-xs font-sans overflow-y-auto flex-1">
               <FormInput label="Book Title" name="title" required placeholder="e.g. The Silent Patient"
                 value={editingBook.title} onChange={e => setEditingBook({ ...editingBook, title: e.target.value })} />
               <FormInput label="Author Name" name="author" required placeholder="e.g. Alex Michaelides"

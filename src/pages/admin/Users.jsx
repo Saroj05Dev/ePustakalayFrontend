@@ -9,7 +9,6 @@ import {
     X,
     Check,
     AlertCircle,
-    Trash2,
     UserCheck,
     TrendingUp,
     Filter,
@@ -205,6 +204,18 @@ const Users = ({ activeNav, setActiveNav }) => {
         dispatch(updateUser({ id, data: { status: nextStatus } }));
     };
 
+    const toggleUserRole = (id) => {
+        const user = users.find(u => u._id === id);
+        if (!user) return;
+        const currentRole = user.role;
+        const nextRole = currentRole === 'admin' ? 'user' : 'admin';
+        const label = nextRole === 'admin' ? 'Admin' : 'User';
+        if (!window.confirm(`Are you sure you want to make "${user.name}" a ${label}?`)) return;
+        dispatch(updateUser({ id, data: { role: nextRole } })).then(() => {
+            dispatch(getAllUsers());
+        });
+    };
+
     const handleResetFilters = () => {
         setRoleFilter("All");
         setStatusFilter("All");
@@ -398,13 +409,20 @@ const Users = ({ activeNav, setActiveNav }) => {
                                                             </button>
                                                         )}
 
-                                                        {/* Delete User */}
+                                                        {/* Role Toggle Button */}
                                                         <button
-                                                            onClick={() => handleDeleteUser(user._id)}
-                                                            className="text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all p-2 rounded-xl border border-transparent hover:border-red-100/40"
-                                                            title="Delete User"
+                                                            onClick={() => toggleUserRole(user._id)}
+                                                            title={user.role === 'admin' ? 'Make User (Remove Admin)' : 'Make Admin'}
+                                                            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[10px] font-bold transition-all cursor-pointer ${
+                                                                user.role === 'admin'
+                                                                    ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                                                                    : 'bg-[#0a2f35]/5 text-[#0a2f35] border-[#0a2f35]/10 hover:bg-[#0a2f35]/10'
+                                                            }`}
                                                         >
-                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                            {user.role === 'admin'
+                                                                ? <><ShieldOff className="w-3.5 h-3.5" /> Remove Admin</>
+                                                                : <><ShieldCheck className="w-3.5 h-3.5" /> Make Admin</>
+                                                            }
                                                         </button>
                                                     </div>
                                                 </td>
