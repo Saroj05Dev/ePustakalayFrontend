@@ -393,11 +393,11 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
 
   const handleAddChapterSubmit = (e) => {
     e.preventDefault();
-    
+
     // Calculate duration if not provided (2 minutes per page)
     const pageCount = Number(chapterData.end_page) - Number(chapterData.start_page) + 1;
     const duration = chapterData.duration_minutes || Math.ceil(pageCount * 2);
-    
+
     dispatch(createChapter({
       book: chapterData.selectedBookId,
       chapter_title: chapterData.chapterName,
@@ -418,11 +418,11 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
 
   const handleUpdateChapter = (e) => {
     e.preventDefault();
-    
+
     // Calculate duration if not provided (2 minutes per page)
     const pageCount = Number(editingChapter.end_page) - Number(editingChapter.start_page) + 1;
     const duration = editingChapter.duration_minutes || Math.ceil(pageCount * 2);
-    
+
     dispatch(updateChapter({
       chapterId: editingChapter._id,
       data: {
@@ -457,48 +457,89 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <div className="text-xs text-slate-400 font-semibold mb-1">
-              Dashboard / <span className="text-slate-600 font-bold">Manage Books</span>
             </div>
             <h1 className="text-2xl font-bold text-[#0a2f35] mb-1 font-sans tracking-tight">Manage Books</h1>
             <p className="text-slate-400 text-sm font-semibold">Review and curate the ePustakalay digital collection.</p>
           </div>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            {/* Category buttons */}
-            <button
-              onClick={() => { setCategorySearch(''); setModal('showCategories'); }}
-              className="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-xs whitespace-nowrap cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
-            >
-              <Layers className="w-4 h-4 text-[#0a2f35]" /> All Categories
-            </button>
-            <button
-              onClick={() => setModal('addCategory')}
-              className="bg-[#0a2f35] hover:bg-[#072226] text-white px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-xs shadow-md shadow-[#0a2f35]/15 whitespace-nowrap cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
-            >
-              <Plus className="w-4 h-4" /> Add Category
-            </button>
+        {/* Step-by-Step Book Publishing Workflow */}
+        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+            {/* Step 1 */}
+            <div className="flex flex-col justify-between gap-4 pb-4 lg:pb-0 lg:pr-6">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#0a2f35] text-white text-[11px] font-black">1</span>
+                    <h3 className="font-extrabold text-sm text-[#0a2f35]">Step 1</h3>
+                  </div>
+                  <Layers className="w-4 h-4 text-slate-300" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setCategorySearch(''); setModal('showCategories'); }}
+                  className="flex-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 text-[11px] cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+                >
+                  <Layers className="w-3.5 h-3.5 text-[#0a2f35]" /> View All
+                </button>
+                <button
+                  onClick={() => setModal('addCategory')}
+                  className="flex-1 bg-[#0a2f35] hover:bg-[#072226] text-white py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 text-[11px] shadow-sm shadow-[#0a2f35]/15 cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add Category
+                </button>
+              </div>
+            </div>
 
-            {/* Chapter buttons */}
-            <button
-              onClick={() => { setChapterSearch(''); setModal('showChapters'); }}
-              className="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-xs whitespace-nowrap cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
-            >
-              <List className="w-4 h-4 text-[#0a2f35]" /> All Chapters
-            </button>
-            <button
-              onClick={() => setModal('addChapter')}
-              className="bg-[#0a2f35] hover:bg-[#072226] text-white px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-xs shadow-md shadow-[#0a2f35]/15 whitespace-nowrap cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
-            >
-              <Plus className="w-4 h-4" /> Add Chapter
-            </button>
+            {/* Step 2 */}
+            <div className="flex flex-col justify-between gap-4 pt-4 lg:pt-0 lg:px-6">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#0a2f35] text-white text-[11px] font-black">2</span>
+                    <h3 className="font-extrabold text-sm text-[#0a2f35]">Step 2</h3>
+                  </div>
+                  <BookOpen className="w-4 h-4 text-slate-300" />
+                </div>
+              </div>
+              <div>
+                <button
+                  onClick={() => setModal('addBook')}
+                  className="w-full bg-[#0a2f35] hover:bg-[#072226] text-white py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 text-[11px] shadow-sm shadow-[#0a2f35]/15 cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add New Book
+                </button>
+              </div>
+            </div>
 
-            {/* Book button */}
-            <button
-              onClick={() => setModal('addBook')}
-              className="bg-[#0a2f35] hover:bg-[#072226] text-white px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 text-xs shadow-md shadow-[#0a2f35]/15 whitespace-nowrap cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
-            >
-              <Plus className="w-4 h-4" /> Add Book
-            </button>
+            {/* Step 3 */}
+            <div className="flex flex-col justify-between gap-4 pt-4 lg:pt-0 lg:pl-6">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#0a2f35] text-white text-[11px] font-black">3</span>
+                    <h3 className="font-extrabold text-sm text-[#0a2f35]">Step 3: Define Chapters</h3>
+                  </div>
+                  <List className="w-4 h-4 text-slate-300" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setChapterSearch(''); setModal('showChapters'); }}
+                  className="flex-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 text-[11px] cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+                >
+                  <List className="w-3.5 h-3.5 text-[#0a2f35]" /> View All
+                </button>
+                <button
+                  onClick={() => setModal('addChapter')}
+                  className="flex-1 bg-[#0a2f35] hover:bg-[#072226] text-white py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 text-[11px] shadow-sm shadow-[#0a2f35]/15 cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Add Chapter
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -873,14 +914,14 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
                       onChange={e => setChapterData({ ...chapterData, chapterName: e.target.value })} />
                   </div>
                 </div>
-                
+
                 {/* Description */}
                 <div className="mb-3">
                   <FormInput label="Description" placeholder="Brief chapter summary (optional)"
                     value={chapterData.description}
                     onChange={e => setChapterData({ ...chapterData, description: e.target.value })} />
                 </div>
-                
+
                 {/* Page Range */}
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <FormInput label="Start Page" required type="number" min="1"
@@ -892,7 +933,7 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
                     value={chapterData.end_page}
                     onChange={e => setChapterData({ ...chapterData, end_page: e.target.value })} />
                 </div>
-                
+
                 {/* Duration (Optional) */}
                 <div>
                   <FormInput label="Duration (minutes)" type="number" min="1"
@@ -1048,7 +1089,7 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
               <FormInput label="Description" placeholder="Brief chapter summary"
                 value={editingChapter.description || ''}
                 onChange={e => setEditingChapter({ ...editingChapter, description: e.target.value })} />
-              
+
               {/* Page Range */}
               <div className="grid grid-cols-2 gap-3">
                 <FormInput label="Start Page" required type="number" min="1"
@@ -1058,7 +1099,7 @@ const ManageBooks = ({ activeNav, setActiveNav }) => {
                   value={editingChapter.end_page || ''}
                   onChange={e => setEditingChapter({ ...editingChapter, end_page: e.target.value })} />
               </div>
-              
+
               {/* Duration */}
               <div>
                 <FormInput label="Duration (minutes)" type="number" min="1"

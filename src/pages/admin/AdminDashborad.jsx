@@ -217,12 +217,12 @@ const AdminDashboard = ({ activeNav, setActiveNav }) => {
       let catLabel = "General";
       let catIdOrName = b.category;
       if (catIdOrName) {
-        if (typeof catIdOrName === "object" && catIdOrName.name) {
-          catLabel = catIdOrName.name;
+        if (typeof catIdOrName === "object") {
+          catLabel = catIdOrName.category_name || catIdOrName.name || "General";
         } else {
           const matched = categoriesData.find(c => c._id === catIdOrName);
           if (matched) {
-            catLabel = matched.name;
+            catLabel = matched.category_name || matched.name;
           } else {
             catLabel = catIdOrName;
           }
