@@ -322,8 +322,8 @@ export default function StudyGuidePanel({ bookId, currentChapter, currentPage, t
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden h-full flex flex-col">
-      {/* Header */}
-      <div className="bg-[#002629] text-white p-4">
+      {/* Header - hidden on mobile as it's in overlay header */}
+      <div className="hidden lg:block bg-[#002629] text-white p-4">
         <h3 className="text-lg font-bold mb-1">Study Guide</h3>
         <p className="text-xs text-gray-300">
           Notes, highlights and bookmarks
@@ -332,42 +332,42 @@ export default function StudyGuidePanel({ bookId, currentChapter, currentPage, t
 
       {/* Progress Bar */}
       {progress && totalPages > 0 && (
-        <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-gray-600">Reading Progress</span>
-            <span className="text-xs font-bold text-[#002629]">{progress.progress || 0}%</span>
+        <div className="px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-1 sm:mb-2">
+            <span className="text-[10px] sm:text-xs font-semibold text-gray-600">Reading Progress</span>
+            <span className="text-xs sm:text-sm font-bold text-[#002629]">{progress.progress || 0}%</span>
           </div>
-          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="w-full h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden">
             <div 
               className="h-full bg-[#1a6b70] transition-all duration-300"
               style={{ width: `${progress.progress || 0}%` }}
             />
           </div>
           <div className="flex items-center justify-between mt-1">
-            <span className="text-xs text-gray-500">Page {currentPage} of {totalPages}</span>
+            <span className="text-[10px] sm:text-xs text-gray-500">Page {currentPage} of {totalPages}</span>
           </div>
         </div>
       )}
 
       {/* Highlight Selection Picker */}
       {showHighlightPicker && (
-        <div className="px-4 py-3 bg-[#fffef8] border-b border-[#f5c842]">
+        <div className="px-3 sm:px-4 py-2 sm:py-3 bg-[#fffef8] border-b border-[#f5c842]">
           {selectedText ? (
             <>
               <div className="mb-2">
-                <p className="text-xs font-semibold text-gray-600 mb-1">Selected text:</p>
-                <p className="text-xs text-gray-800 italic line-clamp-2 bg-green-50 p-2 rounded border border-green-200">
+                <p className="text-[10px] sm:text-xs font-semibold text-gray-600 mb-1">Selected text:</p>
+                <p className="text-[10px] sm:text-xs text-gray-800 italic line-clamp-2 bg-green-50 p-2 rounded border border-green-200">
                   &ldquo;{selectedText}&rdquo;
                 </p>
               </div>
               
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-semibold text-gray-600">Color:</span>
+                <span className="text-[10px] sm:text-xs font-semibold text-gray-600">Color:</span>
                 {Object.entries(highlightColors).map(([key, color]) => (
                   <button
                     key={key}
                     onClick={() => setHighlightColor(key)}
-                    className={`w-6 h-6 rounded-full border-2 transition ${
+                    className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 transition active:scale-90 ${
                       highlightColor === key ? 'ring-2 ring-offset-1 ring-[#002629] scale-110' : ''
                     }`}
                     style={{ 
@@ -383,7 +383,7 @@ export default function StudyGuidePanel({ bookId, currentChapter, currentPage, t
                 <button
                   onClick={handleAddHighlight}
                   disabled={!selectedText}
-                  className="flex-1 px-3 py-2 bg-[#002629] text-white rounded font-semibold text-xs hover:bg-[#083d41] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-2 sm:px-3 py-1.5 sm:py-2 bg-[#002629] text-white rounded font-semibold text-xs hover:bg-[#083d41] transition disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
                 >
                   Add Highlight
                 </button>
@@ -393,19 +393,19 @@ export default function StudyGuidePanel({ bookId, currentChapter, currentPage, t
                     setSelectedText('');
                     window.getSelection().removeAllRanges();
                   }}
-                  className="px-3 py-2 bg-gray-200 text-gray-700 rounded font-semibold text-xs hover:bg-gray-300 transition"
+                  className="px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-200 text-gray-700 rounded font-semibold text-xs hover:bg-gray-300 transition active:scale-95"
                 >
                   Cancel
                 </button>
               </div>
             </>
           ) : (
-            <div className="text-center py-4">
+            <div className="text-center py-3 sm:py-4">
               <p className="text-xs text-yellow-700 font-semibold mb-2">
-                👆 Please select some text in the PDF
+                👆 Select text in the PDF
               </p>
-              <p className="text-xs text-gray-600">
-                Click and drag over text to highlight it
+              <p className="text-[10px] sm:text-xs text-gray-600">
+                Click and drag over text to highlight
               </p>
             </div>
           )}
@@ -414,31 +414,31 @@ export default function StudyGuidePanel({ bookId, currentChapter, currentPage, t
 
       {/* Bookmark Toggle */}
       {currentChapter && (
-        <div className="px-4 py-3 border-b border-gray-200">
+        <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-200">
           <button
             onClick={handleToggleBookmark}
-            className={`w-full px-4 py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition ${
+            className={`w-full px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition active:scale-95 ${
               isChapterBookmarked()
                 ? 'bg-[#002629] text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            <BookmarkIcon size={16} />
-            {isChapterBookmarked() ? 'Chapter Bookmarked ✓' : 'Bookmark This Chapter'}
+            <BookmarkIcon size={14} />
+            {isChapterBookmarked() ? 'Bookmarked ✓' : 'Bookmark Chapter'}
           </button>
-          <p className="text-xs text-gray-500 text-center mt-2">
-            Bookmarks save the current chapter for quick access
+          <p className="text-[10px] sm:text-xs text-gray-500 text-center mt-1 sm:mt-2 px-2">
+            Quick access to this chapter
           </p>
         </div>
       )}
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 px-4">
+      <div className="flex border-b border-gray-200 px-2 sm:px-4 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-3 text-sm font-semibold flex items-center gap-2 border-b-2 transition ${
+            className={`px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-semibold flex items-center gap-1 sm:gap-2 border-b-2 transition whitespace-nowrap ${
               activeTab === tab.id
                 ? 'border-[#002629] text-[#002629]'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -451,7 +451,7 @@ export default function StudyGuidePanel({ bookId, currentChapter, currentPage, t
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4">
         {/* Notes Tab */}
         {activeTab === 'notes' && (
           <div className="space-y-3">
@@ -612,12 +612,12 @@ export default function StudyGuidePanel({ bookId, currentChapter, currentPage, t
 
       {/* Add Note Button */}
       {activeTab === 'notes' && !showAddNote && (
-        <div className="p-4 border-t border-gray-200">
+        <div className="p-3 sm:p-4 border-t border-gray-200">
           <button
             onClick={() => setShowAddNote(true)}
-            className="w-full px-4 py-3 bg-[#002629] text-white rounded-lg font-semibold hover:bg-[#083d41] transition flex items-center justify-center gap-2"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#002629] text-white rounded-lg font-semibold hover:bg-[#083d41] transition flex items-center justify-center gap-2 text-sm active:scale-95"
           >
-            <PlusIcon size={16} />
+            <PlusIcon size={14} />
             Add Note
           </button>
         </div>

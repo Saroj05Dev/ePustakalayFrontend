@@ -6,6 +6,10 @@ import { store } from './redux/store'
 import './index.css'
 import App from './App.jsx'
 
+// Import react-pdf styles
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>

@@ -30,10 +30,10 @@ export default function ChapterNavigation({ chapters = [], currentPage, onChapte
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-      {/* Header */}
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden h-full lg:h-auto">
+      {/* Header - hidden on mobile as it's shown in the overlay header */}
       <div 
-        className="bg-[#002629] text-white p-4 flex items-center justify-between cursor-pointer"
+        className="hidden lg:flex bg-[#002629] text-white p-4 items-center justify-between cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <h3 className="font-bold text-lg">Chapters</h3>
@@ -44,7 +44,7 @@ export default function ChapterNavigation({ chapters = [], currentPage, onChapte
 
       {/* Chapter List */}
       {isExpanded && (
-        <div className="max-h-[70vh] overflow-y-auto">
+        <div className="max-h-[calc(100vh-120px)] lg:max-h-[70vh] overflow-y-auto">
           {chapters.map((chapter, index) => {
             const isActive = activeChapter?._id === chapter._id;
             const pageCount = (chapter.start_page && chapter.end_page) 
@@ -63,16 +63,16 @@ export default function ChapterNavigation({ chapters = [], currentPage, onChapte
                 }}
                 disabled={!chapter.start_page || !chapter.end_page}
                 className={`
-                  w-full text-left p-4 border-b border-gray-100 transition-all
-                  ${(!chapter.start_page || !chapter.end_page) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 cursor-pointer'}
+                  w-full text-left p-3 sm:p-4 border-b border-gray-100 transition-all
+                  ${(!chapter.start_page || !chapter.end_page) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 cursor-pointer active:bg-gray-100'}
                   ${isActive ? 'bg-[#e8f4f5] border-l-4 border-l-[#002629]' : ''}
                 `}
               >
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-2 sm:gap-3">
                   {/* Chapter Number Badge */}
                   <div 
                     className={`
-                      w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm
+                      w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 font-bold text-xs sm:text-sm
                       ${isActive ? 'bg-[#002629] text-white' : 'bg-gray-100 text-gray-600'}
                     `}
                   >
@@ -83,7 +83,7 @@ export default function ChapterNavigation({ chapters = [], currentPage, onChapte
                   <div className="flex-1 min-w-0">
                     <h4 
                       className={`
-                        font-semibold text-sm mb-1 line-clamp-2
+                        font-semibold text-xs sm:text-sm mb-1 line-clamp-2
                         ${isActive ? 'text-[#002629]' : 'text-gray-800'}
                       `}
                     >
@@ -91,25 +91,25 @@ export default function ChapterNavigation({ chapters = [], currentPage, onChapte
                     </h4>
                     
                     {chapter.description && (
-                      <p className="text-xs text-gray-500 mb-2 line-clamp-2">
+                      <p className="text-xs text-gray-500 mb-1 sm:mb-2 line-clamp-1 sm:line-clamp-2">
                         {chapter.description}
                       </p>
                     )}
 
-                    <div className="flex items-center gap-3 text-xs text-gray-400">
+                    <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-[10px] sm:text-xs text-gray-400">
                       {chapter.start_page && chapter.end_page ? (
                         <>
-                          <span>Pages {chapter.start_page}-{chapter.end_page}</span>
-                          <span>•</span>
-                          <span>{pageCount} pages</span>
+                          <span>Pg {chapter.start_page}-{chapter.end_page}</span>
+                          <span className="hidden sm:inline">•</span>
+                          <span className="hidden sm:inline">{pageCount} pages</span>
                         </>
                       ) : (
-                        <span>Page numbers not set</span>
+                        <span>No pages set</span>
                       )}
                       {chapter.duration_minutes && (
                         <>
                           <span>•</span>
-                          <span>~{chapter.duration_minutes} min</span>
+                          <span>~{chapter.duration_minutes}min</span>
                         </>
                       )}
                     </div>
@@ -117,7 +117,7 @@ export default function ChapterNavigation({ chapters = [], currentPage, onChapte
 
                   {/* Active Indicator */}
                   {isActive && (
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <div className="w-2 h-2 bg-[#002629] rounded-full animate-pulse"></div>
                     </div>
                   )}

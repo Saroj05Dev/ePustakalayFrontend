@@ -175,50 +175,62 @@ export default function ReadBookPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Bar */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-20 shadow-sm">
-        <div className="max-w-screen-2xl mx-auto flex items-center justify-between gap-4">
+      <div className="bg-white border-b border-gray-200 px-2 sm:px-4 py-2 sm:py-3 sticky top-0 z-20 shadow-sm">
+        <div className="max-w-screen-2xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
           {/* Left: Back button + Toggle buttons */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={() => navigate(`/books/${id}`)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-sm font-semibold text-gray-700"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-xs sm:text-sm font-semibold text-gray-700"
             >
-              <ArrowLeftIcon size={16} />
+              <ArrowLeftIcon size={14} />
               <span className="hidden sm:inline">Back</span>
             </button>
 
             <button
-              onClick={() => setShowChapters(!showChapters)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition text-sm font-semibold ${
+              onClick={() => {
+                setShowChapters(!showChapters);
+                // On mobile, close study guide when opening chapters
+                if (window.innerWidth < 768 && !showChapters) {
+                  setShowStudyGuide(false);
+                }
+              }}
+              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg transition text-xs sm:text-sm font-semibold ${
                 showChapters 
                   ? 'bg-[#002629] text-white' 
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
               title="Toggle Chapters"
             >
-              <MenuIcon size={18} />
+              <MenuIcon size={16} />
               <span className="hidden sm:inline">Chapters</span>
             </button>
 
             <button
-              onClick={() => setShowStudyGuide(!showStudyGuide)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition text-sm font-semibold ${
+              onClick={() => {
+                setShowStudyGuide(!showStudyGuide);
+                // On mobile, close chapters when opening study guide
+                if (window.innerWidth < 768 && !showStudyGuide) {
+                  setShowChapters(false);
+                }
+              }}
+              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg transition text-xs sm:text-sm font-semibold ${
                 showStudyGuide 
                   ? 'bg-[#002629] text-white' 
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
               title="Toggle Study Guide"
             >
-              <BookOpenIcon size={18} />
-              <span className="hidden sm:inline">Study Guide</span>
+              <BookOpenIcon size={16} />
+              <span className="hidden sm:inline">Study</span>
             </button>
           </div>
 
-          {/* Center: Book title */}
-          <div className="flex-1 text-center hidden md:block">
-            <h1 className="font-bold text-lg text-gray-800 truncate">{book.title}</h1>
+          {/* Center: Book title - hidden on small screens when panels are open */}
+          <div className={`flex-1 text-center ${(showChapters || showStudyGuide) ? 'hidden lg:block' : 'hidden sm:block'}`}>
+            <h1 className="font-bold text-sm sm:text-base lg:text-lg text-gray-800 truncate">{book.title}</h1>
             {book.author && (
-              <p className="text-sm text-gray-500">{book.author}</p>
+              <p className="text-xs sm:text-sm text-gray-500 hidden md:block">{book.author}</p>
             )}
           </div>
 
@@ -230,19 +242,55 @@ export default function ReadBookPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-screen-2xl mx-auto p-4">
-        <div className="flex gap-4">
-          {/* Left Sidebar - Chapters */}
+      <div className="max-w-screen-2xl mx-auto p-2 sm:p-4">
+        <div className="flex flex-col lg:flex-row gap-2 sm:gap-4">
+          {/* Left Sidebar - Chapters - Full width overlay on mobile, sidebar on desktop */}
           {showChapters && (
-            <div className="w-full md:w-80 flex-shrink-0">
-              <div className="sticky top-24">
-                <ChapterNavigation
-                  chapters={sortedChapters}
-                  currentPage={currentPage}
-                  onChapterSelect={handleChapterSelect}
-                />
+            <>
+              {/* Mobile Overlay */}
+              <div 
+                className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+                onClick={() => setShowChapters(false)}
+              />
+              {/* Sidebar Content */}
+              <div className={`
+                fixed lg:relative top-0 left-0 h-full lg:h-auto
+                w-full sm:w-80 lg:w-80 
+                z-40 lg:z-auto
+                bg-white lg:bg-transparent
+                overflow-y-auto lg:overflow-visible
+                transition-transform duration-300
+                ${showChapters ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                lg:shrink-0
+              `}>
+                <div className="lg:sticky lg:top-24 h-full lg:h-auto">
+                  {/* Mobile Close Button */}
+                  <div className="lg:hidden sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                    <h2 className="font-bold text-lg text-gray-800">Chapters</h2>
+                    <button
+                      onClick={() => setShowChapters(false)}
+                      className="p-2 hover:bg-gray-100 rounded-full transition"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  </div>
+                  <ChapterNavigation
+                    chapters={sortedChapters}
+                    currentPage={currentPage}
+                    onChapterSelect={(chapter) => {
+                      handleChapterSelect(chapter);
+                      // Close sidebar on mobile after selection
+                      if (window.innerWidth < 1024) {
+                        setShowChapters(false);
+                      }
+                    }}
+                  />
+                </div>
               </div>
-            </div>
+            </>
           )}
 
           {/* Center - PDF Viewer */}
@@ -253,23 +301,53 @@ export default function ReadBookPage() {
               chapters={sortedChapters}
               onPageChange={handlePageChange}
               onDocumentLoad={(numPages) => setTotalPages(numPages)}
-              height="calc(100vh - 120px)"
+              height="calc(100vh - 100px)"
             />
           </div>
 
-          {/* Right Sidebar - Study Guide (Notes, Highlights, Bookmarks) */}
+          {/* Right Sidebar - Study Guide - Full width overlay on mobile, sidebar on desktop */}
           {showStudyGuide && (
-            <div className="w-full md:w-96 flex-shrink-0">
-              <div className="sticky top-24 max-h-[calc(100vh-120px)]">
-                <StudyGuidePanel
-                  bookId={id}
-                  currentChapter={currentChapter}
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  chapters={sortedChapters}
-                />
+            <>
+              {/* Mobile Overlay */}
+              <div 
+                className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+                onClick={() => setShowStudyGuide(false)}
+              />
+              {/* Sidebar Content */}
+              <div className={`
+                fixed lg:relative top-0 right-0 h-full lg:h-auto
+                w-full sm:w-96 lg:w-96
+                z-40 lg:z-auto
+                bg-white lg:bg-transparent
+                overflow-y-auto lg:overflow-visible
+                transition-transform duration-300
+                ${showStudyGuide ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+                lg:shrink-0
+              `}>
+                <div className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-120px)] h-full lg:h-auto">
+                  {/* Mobile Close Button */}
+                  <div className="lg:hidden sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                    <h2 className="font-bold text-lg text-gray-800">Study Guide</h2>
+                    <button
+                      onClick={() => setShowStudyGuide(false)}
+                      className="p-2 hover:bg-gray-100 rounded-full transition"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  </div>
+                  <StudyGuidePanel
+                    bookId={id}
+                    currentChapter={currentChapter}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    chapters={sortedChapters}
+                  />
+                </div>
               </div>
-            </div>
+            </>
           )}
         </div>
       </div>
