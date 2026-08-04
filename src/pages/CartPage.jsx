@@ -119,7 +119,7 @@ function CartItem({ item, onQtyChange, onRemove }) {
 
   return (
     <div
-      className="group flex flex-col sm:flex-row items-start sm:items-center gap-6 p-6 rounded-xl transition-all duration-300"
+      className="group flex items-start gap-3 sm:gap-6 p-3 sm:p-6 rounded-xl transition-all duration-300"
       style={{
         background: colors.surfaceContainerLowest,
         opacity: removing ? 0 : 1,
@@ -133,8 +133,8 @@ function CartItem({ item, onQtyChange, onRemove }) {
         e.currentTarget.style.boxShadow = "0 0 0 transparent";
       }}
     >
-      {/* Cover */}
-      <div className="w-28 h-40 rounded-lg overflow-hidden flex-shrink-0 shadow-md">
+      {/* Cover - Smaller on mobile */}
+      <div className="w-20 h-28 sm:w-28 sm:h-40 rounded-lg overflow-hidden shrink-0 shadow-md">
         <img
           src={item.book.cover_image}
           alt={`Cover of ${item.book.title}`}
@@ -145,23 +145,23 @@ function CartItem({ item, onQtyChange, onRemove }) {
       {/* Details */}
       <div className="flex-grow min-w-0">
         <div className="flex justify-between items-start gap-2">
-          <div>
+          <div className="min-w-0 flex-1">
             <h3
-              className="text-xl font-extrabold leading-tight"
+              className="text-sm sm:text-xl font-extrabold leading-tight line-clamp-2"
               style={{ fontFamily: "Manrope, sans-serif", color: colors.primary }}
             >
               {item.book.title}
             </h3>
-            <p className="text-sm mt-1" style={{ color: colors.onSurfaceVariant }}>
+            <p className="text-xs sm:text-sm mt-0.5 sm:mt-1 truncate" style={{ color: colors.onSurfaceVariant }}>
               {item.book.author}
             </p>
-            <p className="font-bold mt-2 text-lg" style={{ color: colors.tertiary }}>
+            <p className="font-bold mt-1 sm:mt-2 text-base sm:text-lg" style={{ color: colors.tertiary }}>
               ₹{item.book.price.toFixed(2)}
             </p>
           </div>
           <button
             onClick={handleRemove}
-            className="p-2 rounded-full transition-colors duration-200 flex-shrink-0"
+            className="p-1.5 sm:p-2 rounded-full transition-colors duration-200 shrink-0 active:scale-95"
             style={{ color: colors.onSurfaceVariant }}
             onMouseEnter={(e) => {
               e.currentTarget.style.color = colors.error;
@@ -173,14 +173,14 @@ function CartItem({ item, onQtyChange, onRemove }) {
             }}
             aria-label="Remove item"
           >
-            <MaterialIcon name="delete" />
+            <MaterialIcon name="delete" className="text-lg sm:text-xl" />
           </button>
         </div>
 
-        <div className="mt-5 flex items-center justify-between">
-          {/* Quantity stepper */}
+        <div className="mt-3 sm:mt-5 flex items-center justify-between">
+          {/* Quantity stepper - More compact on mobile */}
           <div
-            className="flex items-center rounded-lg p-1"
+            className="flex items-center rounded-lg p-0.5 sm:p-1"
             style={{ background: colors.surfaceContainerLow }}
           >
             <button
@@ -188,11 +188,11 @@ function CartItem({ item, onQtyChange, onRemove }) {
                 if (item.quantity > 1) {
                   onQtyChange(item.cartItemId, item.quantity - 1);
                 } else {
-                  onRemove(item.cartItemId); // Automatically remove if quantity hits 0
+                  onRemove(item.cartItemId);
                 }
               }}
               disabled={item.quantity <= 1 && !onRemove}
-              className="w-8 h-8 flex items-center justify-center rounded-md transition-colors duration-150 disabled:opacity-30"
+              className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-md transition-colors duration-150 disabled:opacity-30 active:scale-95"
               style={{ color: colors.primary }}
               onMouseEnter={(e) => { if (item.quantity > 1) e.currentTarget.style.background = colors.surfaceContainerHighest; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
@@ -201,17 +201,16 @@ function CartItem({ item, onQtyChange, onRemove }) {
               <MaterialIcon name="remove" className="text-sm" />
             </button>
             <span
-              className="px-4 font-bold text-sm"
-              style={{ color: colors.primary, minWidth: "2rem", textAlign: "center" }}
+              className="px-2 sm:px-4 font-bold text-xs sm:text-sm"
+              style={{ color: colors.primary, minWidth: "1.5rem", textAlign: "center" }}
             >
               {item.quantity}
             </span>
             <button
               onClick={() => {
-
                 onQtyChange(item.cartItemId, item.quantity + 1)
               }}
-              className="w-8 h-8 flex items-center justify-center rounded-md transition-colors duration-150"
+              className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-md transition-colors duration-150 active:scale-95"
               style={{ color: colors.primary }}
               onMouseEnter={(e) => { e.currentTarget.style.background = colors.surfaceContainerHighest; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
@@ -220,14 +219,6 @@ function CartItem({ item, onQtyChange, onRemove }) {
               <MaterialIcon name="add" className="text-sm" />
             </button>
           </div>
-          {/*            
-          <span
-            className="text-sm font-medium italic"
-            style={{ color: item.stock.startsWith("Only") ? colors.tertiary : colors.onSurfaceVariant }}
-          >
-
-            {item.book.stock || "In Stock"}
-          </span> */}
         </div>
       </div>
     </div>
@@ -244,35 +235,35 @@ function OrderSummary({ subtotal, cartCount, promoCode, setPromoCode, onApplyPro
   return (
     <aside className="w-full lg:w-96">
       <div
-        className="rounded-2xl p-8 sticky top-28"
+        className="rounded-2xl p-4 sm:p-8 lg:sticky lg:top-28"
         style={{ background: colors.surfaceContainerLow, boxShadow: `0 2px 12px ${colors.primary}06` }}
       >
         <h2
-          className="text-2xl font-extrabold mb-6"
+          className="text-xl sm:text-2xl font-extrabold mb-4 sm:mb-6"
           style={{ fontFamily: "Manrope, sans-serif", color: colors.primary }}
         >
           Order Summary
         </h2>
 
-        <div className="space-y-4 mb-8">
+        <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
           <SummaryRow label="Subtotal" value={`₹${subtotal.toFixed(2)}`} />
-          <SummaryRow label="Estimated Shipping" value={subtotal > 0 ? `₹${shipping.toFixed(2)}` : "—"} />
-          <SummaryRow label="Taxes (GST 5%)" value={subtotal > 0 ? `₹${tax.toFixed(2)}` : "—"} />
+          <SummaryRow label="Shipping" value={subtotal > 0 ? `₹${shipping.toFixed(2)}` : "—"} />
+          <SummaryRow label="Tax (GST 5%)" value={subtotal > 0 ? `₹${tax.toFixed(2)}` : "—"} />
           {discount > 0 && (
             <SummaryRow label="Promo Discount" value={`− ₹${discount.toFixed(2)}`} accent />
           )}
           <div
-            className="pt-4 flex justify-between items-center"
+            className="pt-3 sm:pt-4 flex justify-between items-center"
             style={{ borderTop: `1px solid ${colors.outlineVariant}33` }}
           >
             <span
-              className="text-lg font-bold"
+              className="text-base sm:text-lg font-bold"
               style={{ fontFamily: "Manrope, sans-serif", color: colors.primary }}
             >
               Order Total
             </span>
             <span
-              className="text-2xl font-black"
+              className="text-xl sm:text-2xl font-black"
               style={{ fontFamily: "Manrope, sans-serif", color: colors.primary }}
             >
               ₹{Math.max(0, total).toFixed(2)}
@@ -281,7 +272,7 @@ function OrderSummary({ subtotal, cartCount, promoCode, setPromoCode, onApplyPro
         </div>
 
         {/* Promo code */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <label
             className="block text-xs font-bold uppercase tracking-wider mb-2"
             style={{ color: colors.onSurfaceVariant }}
@@ -294,7 +285,7 @@ function OrderSummary({ subtotal, cartCount, promoCode, setPromoCode, onApplyPro
               value={promoCode}
               onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
               placeholder="Enter code"
-              className="flex-grow rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 placeholder:opacity-50"
+              className="flex-grow rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm outline-none focus:ring-2 placeholder:opacity-50"
               style={{
                 background: colors.surfaceContainerLowest,
                 border: `1px solid ${colors.outlineVariant}33`,
@@ -306,7 +297,7 @@ function OrderSummary({ subtotal, cartCount, promoCode, setPromoCode, onApplyPro
             />
             <button
               onClick={onApplyPromo}
-              className="px-4 py-2 rounded-lg text-sm font-bold transition-colors duration-200"
+              className="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-colors duration-200 active:scale-95"
               style={{ background: colors.primaryContainer, color: colors.onPrimaryContainer }}
               onMouseEnter={(e) => { e.currentTarget.style.background = colors.primary; e.currentTarget.style.color = "#fff"; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = colors.primaryContainer; e.currentTarget.style.color = colors.onPrimaryContainer; }}
@@ -325,7 +316,7 @@ function OrderSummary({ subtotal, cartCount, promoCode, setPromoCode, onApplyPro
         <button
           onClick={() => navigate("/checkout")}
           disabled={cartCount === 0}
-          className="w-full py-4 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed group"
+          className="w-full py-3 sm:py-4 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed group text-sm sm:text-base"
           style={{
             background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryContainer})`,
             fontFamily: "Manrope, sans-serif",
@@ -336,12 +327,12 @@ function OrderSummary({ subtotal, cartCount, promoCode, setPromoCode, onApplyPro
           <MaterialIcon name="arrow_forward" className="text-sm group-hover:translate-x-1 transition-transform duration-200" />
         </button>
 
-        {/* Payment logos (SVG placeholders styled to match brand) */}
-        <div className="mt-6 flex items-center justify-center gap-6">
+        {/* Payment logos */}
+        <div className="mt-4 sm:mt-6 flex items-center justify-center gap-3 sm:gap-6">
           {["VISA", "MC", "GPay"].map((p) => (
             <div
               key={p}
-              className="px-3 py-1 rounded text-xs font-black tracking-wider opacity-50"
+              className="px-2 sm:px-3 py-1 rounded text-[10px] sm:text-xs font-black tracking-wider opacity-50"
               style={{ background: colors.surfaceContainerHigh, color: colors.primary }}
             >
               {p}
@@ -352,16 +343,16 @@ function OrderSummary({ subtotal, cartCount, promoCode, setPromoCode, onApplyPro
 
       {/* Trust badge */}
       <div
-        className="mt-6 p-5 rounded-xl flex items-start gap-4"
+        className="mt-4 sm:mt-6 p-4 sm:p-5 rounded-xl flex items-start gap-3 sm:gap-4"
         style={{ background: `${colors.surfaceContainerHighest}50` }}
       >
-        <MaterialIcon name="verified_user" filled className="flex-shrink-0" style={{ color: colors.primaryFixedDim }} />
+        <MaterialIcon name="verified_user" filled className="shrink-0 text-lg sm:text-xl" style={{ color: colors.primaryFixedDim }} />
         <div>
-          <h4 className="text-sm font-bold" style={{ color: colors.primary }}>
-            Secured Reader Experience
+          <h4 className="text-xs sm:text-sm font-bold" style={{ color: colors.primary }}>
+            Secured Experience
           </h4>
-          <p className="text-xs mt-1 leading-relaxed" style={{ color: colors.onSurfaceVariant }}>
-            All transactions are encrypted with 256-bit SSL. Quality guaranteed by the ePustakalay Curator Program.
+          <p className="text-[10px] sm:text-xs mt-1 leading-relaxed" style={{ color: colors.onSurfaceVariant }}>
+            All transactions encrypted with 256-bit SSL. Quality guaranteed.
           </p>
         </div>
       </div>
@@ -371,12 +362,12 @@ function OrderSummary({ subtotal, cartCount, promoCode, setPromoCode, onApplyPro
 
 function SummaryRow({ label, value, accent }) {
   return (
-    <div className="flex justify-between items-center">
-      <span className="font-medium text-sm" style={{ color: colors.onSurfaceVariant }}>
+    <div className="flex justify-between items-center gap-2">
+      <span className="font-medium text-xs sm:text-sm" style={{ color: colors.onSurfaceVariant }}>
         {label}
       </span>
       <span
-        className="font-semibold text-sm"
+        className="font-semibold text-xs sm:text-sm"
         style={{ color: accent ? "#2e7d32" : colors.onSurface }}
       >
         {value}
@@ -395,34 +386,34 @@ function RecommendationCard({ book, onAdd }) {
 
   return (
     <div
-      className="p-4 rounded-xl transition-all duration-300"
+      className="p-3 sm:p-4 rounded-xl transition-all duration-300 active:scale-95"
       style={{ background: colors.surfaceContainerLowest, boxShadow: `0 1px 4px ${colors.primary}08` }}
       onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 6px 24px ${colors.primary}10`; }}
       onMouseLeave={(e) => { e.currentTarget.style.boxShadow = `0 1px 4px ${colors.primary}08`; }}
     >
-      <div className="w-full aspect-[2/3] rounded-lg overflow-hidden mb-4">
+      <div className="w-full aspect-[2/3] rounded-lg overflow-hidden mb-3 sm:mb-4">
         <img src={book.cover} alt={book.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
       </div>
-      <h4 className="font-bold truncate text-sm" style={{ color: colors.primary }}>
+      <h4 className="font-bold truncate text-xs sm:text-sm" style={{ color: colors.primary }}>
         {book.title}
       </h4>
-      <p className="text-xs mt-0.5" style={{ color: colors.onSurfaceVariant }}>
+      <p className="text-[10px] sm:text-xs mt-0.5 truncate" style={{ color: colors.onSurfaceVariant }}>
         {book.author}
       </p>
-      <div className="mt-3 flex justify-between items-center">
-        <span className="font-bold text-sm" style={{ color: colors.tertiary }}>
+      <div className="mt-2 sm:mt-3 flex justify-between items-center">
+        <span className="font-bold text-xs sm:text-sm" style={{ color: colors.tertiary }}>
           ₹{book.price}
         </span>
         <button
           onClick={handleAdd}
-          className="w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-200"
+          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-colors duration-200 active:scale-90"
           style={{
             background: added ? colors.primary : colors.surfaceContainerLow,
             color: added ? "#fff" : colors.primary,
           }}
           aria-label={`Add ${book.title} to cart`}
         >
-          <MaterialIcon name={added ? "check" : "add_shopping_cart"} className="text-sm" />
+          <MaterialIcon name={added ? "check" : "add_shopping_cart"} className="text-xs sm:text-sm" />
         </button>
       </div>
     </div>
@@ -534,40 +525,40 @@ export default function CartPage() {
 
 
       {/* ── Main Content ── */}
-      <main className="pt-24 pb-16 px-6 md:px-12 max-w-7xl mx-auto">
+      <main className="pt-16 sm:pt-24 pb-12 sm:pb-16 px-3 sm:px-6 md:px-12 max-w-7xl mx-auto">
         {/* Breadcrumb */}
-        <div className="mb-10">
-          <div className="flex items-center gap-1.5 text-sm font-medium mb-2" style={{ color: colors.onSurfaceVariant }}>
+        <div className="mb-6 sm:mb-10">
+          <div className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-medium mb-1 sm:mb-2" style={{ color: colors.onSurfaceVariant }}>
             <span>Home</span>
             <MaterialIcon name="chevron_right" className="text-xs" />
-            <span className="font-bold" style={{ color: colors.primary }}>Shopping Cart</span>
+            <span className="font-bold" style={{ color: colors.primary }}>Cart</span>
           </div>
           <h1
-            className="text-4xl md:text-5xl font-extrabold tracking-tight"
+            className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight"
             style={{ fontFamily: "Manrope, sans-serif", color: colors.primary, letterSpacing: "-0.02em" }}
           >
             Your Library Bag
           </h1>
-          <p className="mt-2 font-medium" style={{ color: colors.onSurfaceVariant }}>
+          <p className="mt-1 sm:mt-2 font-medium text-sm sm:text-base" style={{ color: colors.onSurfaceVariant }}>
             {Items.length === 0
               ? "Your bag is empty — explore titles below."
-              : `You have ${Items.length} premium title${Items.length > 1 ? "s" : ""} reserved in your cart.`}
+              : `${Items.length} premium title${Items.length > 1 ? "s" : ""} in cart.`}
           </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-12">
+        <div className="flex flex-col lg:flex-row gap-6 sm:gap-12">
           {/* Cart Items */}
-          <div className="flex-grow space-y-5 min-w-0">
+          <div className="flex-grow space-y-3 sm:space-y-5 min-w-0">
             {Items.length === 0 ? (
               <div
-                className="flex flex-col items-center justify-center py-24 rounded-2xl text-center"
+                className="flex flex-col items-center justify-center py-16 sm:py-24 rounded-2xl text-center"
                 style={{ background: colors.surfaceContainerLow }}
               >
-                <MaterialIcon name="menu_book" className="text-5xl mb-4 opacity-30" />
-                <p className="font-bold text-lg" style={{ color: colors.onSurfaceVariant }}>
+                <MaterialIcon name="menu_book" className="text-4xl sm:text-5xl mb-3 sm:mb-4 opacity-30" />
+                <p className="font-bold text-base sm:text-lg" style={{ color: colors.onSurfaceVariant }}>
                   No titles in your bag yet.
                 </p>
-                <p className="text-sm mt-1" style={{ color: colors.onSurfaceVariant, opacity: 0.7 }}>
+                <p className="text-xs sm:text-sm mt-1 px-4" style={{ color: colors.onSurfaceVariant, opacity: 0.7 }}>
                   Add something from the recommendations below.
                 </p>
               </div>
@@ -596,29 +587,30 @@ export default function CartPage() {
         </div>
 
         {/* Recommendations */}
-        <section className="mt-24">
-          <div className="flex justify-between items-end mb-8 flex-wrap gap-4">
+        <section className="mt-16 sm:mt-24">
+          <div className="flex justify-between items-end mb-6 sm:mb-8 flex-wrap gap-3 sm:gap-4">
             <div>
               <h2
-                className="text-3xl font-extrabold"
+                className="text-xl sm:text-3xl font-extrabold"
                 style={{ fontFamily: "Manrope, sans-serif", color: colors.primary }}
               >
                 Frequently Bought Together
               </h2>
-              <p className="font-medium mt-1" style={{ color: colors.onSurfaceVariant }}>
+              <p className="font-medium mt-0.5 sm:mt-1 text-xs sm:text-base" style={{ color: colors.onSurfaceVariant }}>
                 Curated based on your interests.
               </p>
             </div>
             <button
-              className="font-bold flex items-center gap-1 hover:underline text-sm"
+              className="font-bold flex items-center gap-1 hover:underline text-xs sm:text-sm"
               style={{ color: colors.primary }}
             >
-              View All Recommendations
+              <span className="hidden sm:inline">View All Recommendations</span>
+              <span className="sm:hidden">View All</span>
               <MaterialIcon name="east" className="text-sm" />
             </button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
             {RECOMMENDATIONS.map((book) => (
               <RecommendationCard key={book.id} book={book} onAdd={handleAddRecommendation} />
             ))}
@@ -630,13 +622,12 @@ export default function CartPage() {
       {/* ── Toast Notification ── */}
       {toast && (
         <div
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl text-sm font-semibold shadow-xl z-50 transition-all duration-300"
+          className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 px-4 sm:px-6 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold shadow-xl z-50 transition-all duration-300 max-w-[90%] sm:max-w-none text-center"
           style={{
             background: colors.primary,
             color: "#fff",
             fontFamily: "Inter, sans-serif",
             boxShadow: `0 8px 32px ${colors.primary}40`,
-            whiteSpace: "nowrap",
           }}
         >
           {toast}
