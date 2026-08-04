@@ -94,37 +94,32 @@ export default function StudyGuidePanel({ bookId, currentChapter, currentPage, t
       // Calculate progress percentage based on page number
       const progressPercentage = Math.round((currentPage / totalPages) * 100);
       
-      // Calculate chapter index (for chapter-based progress)
-      const chapterIndex = chapters.findIndex(ch => ch._id === currentChapter._id);
-      const chapterProgress = chapterIndex >= 0 
-        ? Math.round(((chapterIndex + 1) / chapters.length) * 100)
-        : 0;
-
-      // Use page-based progress (more accurate)
-      const finalProgress = progressPercentage;
-
-      // Only update if progress exists or create new one
-      if (progress) {
-        dispatch(updateReadingProgress({
-          id: progress._id,
-          data: {
+      // Debounce the update to avoid too many API calls
+      const timeoutId = setTimeout(() => {
+        // Only update if progress exists
+        if (progress && progress._id) {
+          dispatch(updateReadingProgress({
+            progressId: progress._id,
+            data: {
+              chapter: currentChapter._id,
+              current_page: currentPage,
+              progress: progressPercentage,
+            }
+          }));
+        } else {
+          // Create new progress entry only once per book
+          dispatch(createReadingProgress({
+            book: bookId,
             chapter: currentChapter._id,
-            pageNumber: currentPage,
-            progress: finalProgress,
-            lastReadAt: new Date().toISOString(),
-          }
-        }));
-      } else {
-        // Create new progress entry
-        dispatch(createReadingProgress({
-          book: bookId,
-          chapter: currentChapter._id,
-          pageNumber: currentPage,
-          progress: finalProgress,
-        }));
-      }
+            current_page: currentPage,
+            progress: progressPercentage,
+          }));
+        }
+      }, 1000); // Wait 1 second after page change before updating
+
+      return () => clearTimeout(timeoutId);
     }
-  }, [currentPage, currentChapter, bookId, totalPages, chapters.length, dispatch]);
+  }, [currentPage, currentChapter, bookId, totalPages, chapters.length, progress?._id, dispatch]);
 
   // Text selection handler for highlighting - PDF only
   useEffect(() => {

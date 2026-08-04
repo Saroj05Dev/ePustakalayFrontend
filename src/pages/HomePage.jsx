@@ -4,7 +4,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAllCategories } from "../redux/slices/categorySlice";
 import { getAllBooks } from "../redux/slices/bookSlice";
 import { toggleWishlist, getAllWishlist } from "../redux/slices/wishlistSlice";
+import { getAllUserProgress } from "../redux/slices/progressSlice";
 import toast from "react-hot-toast";
+import ContinueReading from "../components/ContinueReading";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 const ArrowForwardIcon = () => (
@@ -207,12 +209,14 @@ export default function HomePage() {
   const books = useSelector((state) => state.books?.booksData || []);
   const { wishlistData } = useSelector((state) => state.wishlist);
   const { isLoggedIn } = useSelector((state) => state.auth);
+  const { continueReadingData } = useSelector((state) => state.progress);
 
   useEffect(() => {
     dispatch(getAllCategories());
     dispatch(getAllBooks());
     if (isLoggedIn) {
       dispatch(getAllWishlist());
+      dispatch(getAllUserProgress());
     }
   }, [dispatch, isLoggedIn]);
 
@@ -381,6 +385,11 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* ── Continue Reading ── */}
+        {isLoggedIn && continueReadingData && continueReadingData.length > 0 && (
+          <ContinueReading continueReadingData={continueReadingData} />
+        )}
 
         {/* ── Browse Collections (Bento Grid) ── */}
         <section className="bg-[#f1f4fa] py-12 md:py-24 px-4 md:px-6 lg:px-12">

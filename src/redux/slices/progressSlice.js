@@ -3,6 +3,7 @@ import axiosInstance from "../../helpers/axiosInstance";
 
 const initialState = {
     currentProgress: null,
+    continueReadingData: [],
     isLoading: false,
     hasFetched: false,
 };
@@ -37,6 +38,18 @@ export const updateReadingProgress = createAsyncThunk(
     async ({ progressId, data }) => {
         try {
             const response = await axiosInstance.put(`/progress/${progressId}`, data);
+            return response;
+        } catch (error) {
+        }
+    }
+);
+
+// Get all user progress for continue reading
+export const getAllUserProgress = createAsyncThunk(
+    "/progress/getAllUserProgress",
+    async () => {
+        try {
+            const response = await axiosInstance.get("/progress/user/all");
             return response;
         } catch (error) {
         }
@@ -84,6 +97,20 @@ const progressSlice = createSlice({
                 if (data) {
                     state.currentProgress = data;
                 }
+            })
+
+            // getAllUserProgress
+            .addCase(getAllUserProgress.pending, (state) => { 
+                state.isLoading = true; 
+            })
+            .addCase(getAllUserProgress.fulfilled, (state, action) => {
+                state.isLoading = false;
+                const data = action?.payload?.data?.data || action?.payload?.data;
+                state.continueReadingData = Array.isArray(data) ? data : [];
+            })
+            .addCase(getAllUserProgress.rejected, (state) => { 
+                state.isLoading = false;
+                state.continueReadingData = [];
             });
     },
 });
