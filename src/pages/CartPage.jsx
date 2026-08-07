@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { getCart, updateCartItem, removeCartItem, setGuestCart, updateGuestCartQty, removeFromGuestCart, addToGuestCart } from "../redux/slices/cartSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { PremiumEmptyState } from "../components/Skeletons";
 
 // ─── Color tokens matching the ePustakalay design system ───────────────────
 const colors = {
@@ -525,66 +526,63 @@ export default function CartPage() {
 
 
       {/* ── Main Content ── */}
-      <main className="pt-16 sm:pt-24 pb-12 sm:pb-16 px-3 sm:px-6 md:px-12 max-w-7xl mx-auto">
-        {/* Breadcrumb */}
-        <div className="mb-6 sm:mb-10">
-          <div className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-medium mb-1 sm:mb-2" style={{ color: colors.onSurfaceVariant }}>
-            <span>Home</span>
-            <MaterialIcon name="chevron_right" className="text-xs" />
-            <span className="font-bold" style={{ color: colors.primary }}>Cart</span>
+      <main className="pt-20 sm:pt-28 pb-12 sm:pb-16 px-3 sm:px-6 md:px-12 max-w-7xl mx-auto">
+        {Items.length === 0 ? (
+          <div className="py-4">
+            <PremiumEmptyState
+              title="Your cart is empty."
+              subtitle="Start exploring books and add them to your cart."
+              icon="shopping_cart"
+              actionText="Start exploring books"
+              actionLink="/books"
+            />
           </div>
-          <h1
-            className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight"
-            style={{ fontFamily: "Manrope, sans-serif", color: colors.primary, letterSpacing: "-0.02em" }}
-          >
-            Your Library Bag
-          </h1>
-          <p className="mt-1 sm:mt-2 font-medium text-sm sm:text-base" style={{ color: colors.onSurfaceVariant }}>
-            {Items.length === 0
-              ? "Your bag is empty — explore titles below."
-              : `${Items.length} premium title${Items.length > 1 ? "s" : ""} in cart.`}
-          </p>
-        </div>
-
-        <div className="flex flex-col lg:flex-row gap-6 sm:gap-12">
-          {/* Cart Items */}
-          <div className="flex-grow space-y-3 sm:space-y-5 min-w-0">
-            {Items.length === 0 ? (
-              <div
-                className="flex flex-col items-center justify-center py-16 sm:py-24 rounded-2xl text-center"
-                style={{ background: colors.surfaceContainerLow }}
-              >
-                <MaterialIcon name="menu_book" className="text-4xl sm:text-5xl mb-3 sm:mb-4 opacity-30" />
-                <p className="font-bold text-base sm:text-lg" style={{ color: colors.onSurfaceVariant }}>
-                  No titles in your bag yet.
-                </p>
-                <p className="text-xs sm:text-sm mt-1 px-4" style={{ color: colors.onSurfaceVariant, opacity: 0.7 }}>
-                  Add something from the recommendations below.
-                </p>
+        ) : (
+          <>
+            {/* Breadcrumb & Header */}
+            <div className="mb-6 sm:mb-10">
+              <div className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-medium mb-1 sm:mb-2" style={{ color: colors.onSurfaceVariant }}>
+                <span>Home</span>
+                <MaterialIcon name="chevron_right" className="text-xs" />
+                <span className="font-bold" style={{ color: colors.primary }}>Cart</span>
               </div>
-            ) : (
-              Items.map((item) => (
-                <CartItem
-                  key={item.cartItemId}
-                  item={item}
-                  onQtyChange={handleQtyChange}
-                  onRemove={handleRemove}
-                />
-              ))
-            )}
-          </div>
+              <h1
+                className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight"
+                style={{ fontFamily: "Manrope, sans-serif", color: colors.primary, letterSpacing: "-0.02em" }}
+              >
+                Your Library Bag
+              </h1>
+              <p className="mt-1 sm:mt-2 font-medium text-sm sm:text-base" style={{ color: colors.onSurfaceVariant }}>
+                {`${Items.length} premium title${Items.length > 1 ? "s" : ""} in cart.`}
+              </p>
+            </div>
 
-          {/* Order Summary */}
-          <OrderSummary
-            subtotal={subtotal}
-            cartCount={Items.length}
-            promoCode={promoCode}
-            setPromoCode={setPromoCode}
-            onApplyPromo={handleApplyPromo}
-            discount={discount}
-            onCheckout={() => showToast("Redirecting to checkout…")}
-          />
-        </div>
+            <div className="flex flex-col lg:flex-row gap-6 sm:gap-12">
+              {/* Cart Items */}
+              <div className="flex-grow space-y-3 sm:space-y-5 min-w-0">
+                {Items.map((item) => (
+                  <CartItem
+                    key={item.cartItemId}
+                    item={item}
+                    onQtyChange={handleQtyChange}
+                    onRemove={handleRemove}
+                  />
+                ))}
+              </div>
+
+              {/* Order Summary */}
+              <OrderSummary
+                subtotal={subtotal}
+                cartCount={Items.length}
+                promoCode={promoCode}
+                setPromoCode={setPromoCode}
+                onApplyPromo={handleApplyPromo}
+                discount={discount}
+                onCheckout={() => showToast("Redirecting to checkout…")}
+              />
+            </div>
+          </>
+        )}
 
         {/* Recommendations */}
         <section className="mt-16 sm:mt-24">

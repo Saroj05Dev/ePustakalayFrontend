@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 
 const initialState = {
     booksData: [],
+    isLoading: false,
 };
 
 export const createBook = createAsyncThunk(
@@ -140,9 +141,16 @@ const bookSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
+            .addCase(getAllBooks.pending, (state) => {
+                state.isLoading = true;
+            })
             .addCase(getAllBooks.fulfilled, (state, action) => {
+                state.isLoading = false;
                 const fetchedBooks = action?.payload?.data?.data || action?.payload?.data;
                 state.booksData = Array.isArray(fetchedBooks) ? fetchedBooks : [];
+            })
+            .addCase(getAllBooks.rejected, (state) => {
+                state.isLoading = false;
             })
             .addCase(createBook.fulfilled, (state, action) => {
                 const newBook = action?.payload?.data?.data || action?.payload?.data;

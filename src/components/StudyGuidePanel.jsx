@@ -4,9 +4,11 @@ import { useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   getNotesByBookAndChapter,
+  getAllNotes,
   createNote,
   deleteNote,
 } from '../redux/slices/notesSlice';
+import { exportBookNotes } from '../utils/exportNotes';
 import {
   getHighlightsByChapter,
   createHighlight,
@@ -309,6 +311,38 @@ export default function StudyGuidePanel({ bookId, currentChapter, currentPage, t
     );
   };
 
+  const books = useSelector((state) => state.books?.booksData || []);
+
+  const handleExportNotes = async () => {
+    let activeNotes = notes;
+    let activeHighlights = highlights;
+
+    try {
+      const res = await dispatch(getAllNotes()).unwrap();
+      const allFetched = res?.data?.data || res?.data || [];
+      if (Array.isArray(allFetched) && allFetched.length > 0) {
+        const bNotes = allFetched.filter((n) => {
+          const noteBookId = n.book && typeof n.book === 'object' ? n.book._id : n.book;
+          return !bookId || noteBookId === bookId;
+        });
+        if (bNotes.length > 0) {
+          activeNotes = bNotes;
+        }
+      }
+    } catch (err) {
+      // fallback
+    }
+
+    const currentBook = books.find((b) => b._id === bookId);
+
+    exportBookNotes({
+      book: currentBook,
+      chapters: chapters || [],
+      notes: activeNotes,
+      highlights: activeHighlights,
+    });
+  };
+
   const tabs = [
     { id: 'notes', label: 'Notes', icon: <NoteIcon size={14} /> },
     { id: 'highlights', label: 'Highlights', icon: <HighlightIcon size={14} /> },
@@ -319,10 +353,28 @@ export default function StudyGuidePanel({ bookId, currentChapter, currentPage, t
     <div className="bg-white rounded-xl shadow-lg overflow-hidden h-full flex flex-col">
       {/* Header - hidden on mobile as it's in overlay header */}
       <div className="hidden lg:block bg-[#002629] text-white p-4">
-        <h3 className="text-lg font-bold mb-1">Study Guide</h3>
-        <p className="text-xs text-gray-300">
-          Notes, highlights and bookmarks
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold mb-1">Study Guide</h3>
+            <p className="text-xs text-gray-300">
+              Notes, highlights and bookmarks
+            </p>
+          </div>
+          {notes.length > 0 && (
+            <button
+              onClick={handleExportNotes}
+              className="px-3 py-1.5 bg-[#e8f4f5] text-[#1a6b70] hover:bg-[#1a6b70] hover:text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+              title="Export Notes to TXT"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <span>Export Notes</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Progress Bar */}
@@ -605,16 +657,30 @@ export default function StudyGuidePanel({ bookId, currentChapter, currentPage, t
         )}
       </div>
 
-      {/* Add Note Button */}
+      {/* Add Note & Export Footer */}
       {activeTab === 'notes' && !showAddNote && (
-        <div className="p-3 sm:p-4 border-t border-gray-200">
+        <div className="p-3 sm:p-4 border-t border-gray-200 flex gap-2">
           <button
             onClick={() => setShowAddNote(true)}
-            className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-[#002629] text-white rounded-lg font-semibold hover:bg-[#083d41] transition flex items-center justify-center gap-2 text-sm active:scale-95"
+            className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#002629] text-white rounded-lg font-semibold hover:bg-[#083d41] transition flex items-center justify-center gap-2 text-xs sm:text-sm active:scale-95 cursor-pointer"
           >
             <PlusIcon size={14} />
             Add Note
           </button>
+          {notes.length > 0 && (
+            <button
+              onClick={handleExportNotes}
+              className="px-3 sm:px-4 py-2 sm:py-2.5 bg-[#e8f4f5] text-[#1a6b70] border border-[#1a6b70]/30 hover:bg-[#1a6b70] hover:text-white rounded-lg font-semibold transition flex items-center justify-center gap-1.5 text-xs sm:text-sm active:scale-95 cursor-pointer"
+              title="Export Notes as TXT file"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <span>Export Notes</span>
+            </button>
+          )}
         </div>
       )}
     </div>

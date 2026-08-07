@@ -7,6 +7,7 @@ import { getAllCategories } from "../redux/slices/categorySlice";
 import { addToCart, getCart, addToGuestCart, setGuestCart } from "../redux/slices/cartSlice";
 import { toggleWishlist, getAllWishlist } from "../redux/slices/wishlistSlice";
 import toast from "react-hot-toast";
+import { BookGridSkeleton, BooksPageSkeleton, PremiumEmptyState } from "../components/Skeletons";
 
 const colors = {
   primary: "#002629",
@@ -186,6 +187,7 @@ export default function EPustakalay() {
   const books = useSelector(
     (state) => state.books.booksData || []
   );
+  const isLoading = useSelector((state) => state.books.isLoading);
 
   const categories = useSelector(
     (state) => state.categories.categoriesData || []
@@ -193,6 +195,16 @@ export default function EPustakalay() {
 
   const { wishlistData } = useSelector((state) => state.wishlist);
   const { isLoggedIn } = useSelector((state) => state.auth);
+
+  const [isPageLoading, setIsPageLoading] = useState(true);
+
+  useEffect(() => {
+    setIsPageLoading(true);
+    const timer = setTimeout(() => {
+      setIsPageLoading(false);
+    }, 450);
+    return () => clearTimeout(timer);
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     dispatch(getAllBooks());
@@ -336,6 +348,10 @@ export default function EPustakalay() {
 
     default:
       break;
+  }
+
+  if (isLoading || isPageLoading) {
+    return <BooksPageSkeleton />;
   }
 
   return (
@@ -603,16 +619,35 @@ export default function EPustakalay() {
           </div>
 
           {/* Books Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-9xl mx-auto ">
-            {sortedBooks.map((book) => (
-              <BookCard
-                key={book._id}
-                book={book}
-                isInWishlist={isBookInWishlist(book._id)}
-                onWishlistToggle={handleWishlistToggle}
+          {(isLoading || isPageLoading) ? (
+            <BookGridSkeleton count={sortedBooks.length > 0 ? sortedBooks.length : (books.length > 0 ? books.length : 6)} />
+          ) : sortedBooks.length === 0 ? (
+            <div className="py-4">
+              <PremiumEmptyState
+                title="No books found"
+                subtitle="Try adjusting your filters or search terms to find what you're looking for."
+                icon="search_off"
+                actionText="Reset Filters"
+                onActionClick={() => {
+                  setCheckedCategories([]);
+                  setActiveLanguage("");
+                  setPriceRange(maxPrice);
+                  navigate("/books");
+                }}
               />
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-9xl mx-auto ">
+              {sortedBooks.map((book) => (
+                <BookCard
+                  key={book._id}
+                  book={book}
+                  isInWishlist={isBookInWishlist(book._id)}
+                  onWishlistToggle={handleWishlistToggle}
+                />
+              ))}
+            </div>
+          )}
 
 
 

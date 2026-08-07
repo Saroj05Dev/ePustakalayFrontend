@@ -3,6 +3,9 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllBooks } from '../redux/slices/bookSlice';
 import { getChaptersByBook } from '../redux/slices/chapterSlice';
+import { getNotesByBookAndChapter, getAllNotes } from '../redux/slices/notesSlice';
+import { getHighlightsByChapter } from '../redux/slices/highlightSlice';
+import { exportBookNotes } from '../utils/exportNotes';
 import PDFViewer from '../components/PDFViewer';
 import ChapterNavigation from '../components/ChapterNavigation';
 import StudyGuidePanel from '../components/StudyGuidePanel';
@@ -26,7 +29,7 @@ const MenuIcon = ({ size = 20 }) => (
 const BookOpenIcon = ({ size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    <path d="M22 3h-6a4 4 0 0 1 3-3h7z" />
   </svg>
 );
 
@@ -38,6 +41,8 @@ export default function ReadBookPage() {
 
   const books = useSelector((state) => state.books?.booksData || []);
   const chapters = useSelector((state) => state.chapter?.chaptersData || []);
+  const notes = useSelector((state) => state.notes?.notesData || []);
+  const highlights = useSelector((state) => state.highlights?.highlightsData || []);
   const isLoggedIn = useSelector((state) => state.auth?.isLoggedIn);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,6 +51,45 @@ export default function ReadBookPage() {
   const [showChapters, setShowChapters] = useState(true);
   const [showStudyGuide, setShowStudyGuide] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Automatically fetch notes & highlights when book or current chapter changes
+  useEffect(() => {
+    if (id && currentChapter?._id) {
+      dispatch(getNotesByBookAndChapter({ bookId: id, chapterId: currentChapter._id }));
+      dispatch(getHighlightsByChapter({ bookId: id, chapterId: currentChapter._id }));
+    } else if (id) {
+      dispatch(getAllNotes());
+    }
+  }, [id, currentChapter?._id, dispatch]);
+
+  const handleExportNotes = async () => {
+    let activeNotes = notes;
+    let activeHighlights = highlights;
+
+    try {
+      const res = await dispatch(getAllNotes()).unwrap();
+      const allFetched = res?.data?.data || res?.data || [];
+      if (Array.isArray(allFetched) && allFetched.length > 0) {
+        const bookNotes = allFetched.filter(n => {
+          const noteBookId = n.book && typeof n.book === 'object' ? n.book._id : n.book;
+          return String(noteBookId) === String(id);
+        });
+        if (bookNotes.length > 0) {
+          activeNotes = bookNotes;
+        }
+      }
+    } catch (err) {
+      // fallback
+    }
+
+    const sortedChapters = [...chapters].sort((a, b) => a.chapter_number - b.chapter_number);
+    exportBookNotes({
+      book,
+      chapters: sortedChapters,
+      notes: activeNotes,
+      highlights: activeHighlights,
+    });
+  };
 
   // Get initial page and chapter from URL query params
   useEffect(() => {
@@ -234,9 +278,20 @@ export default function ReadBookPage() {
             )}
           </div>
 
-          {/* Right: Additional actions placeholder */}
+          {/* Right: Export Notes button */}
           <div className="flex items-center gap-2">
-            {/* You can add bookmark, notes, etc. buttons here */}
+            <button
+              onClick={handleExportNotes}
+              className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 bg-[#002629] text-white hover:bg-[#083d41] rounded-lg transition text-xs sm:text-sm font-semibold shadow-xs cursor-pointer active:scale-95"
+              title="Export Notes as TXT file"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <span>Export Notes</span>
+            </button>
           </div>
         </div>
       </div>

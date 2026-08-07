@@ -7,6 +7,7 @@ import { toggleWishlist, getAllWishlist } from "../redux/slices/wishlistSlice";
 import { getAllUserProgress } from "../redux/slices/progressSlice";
 import toast from "react-hot-toast";
 import ContinueReading from "../components/ContinueReading";
+import { HomePageSkeleton } from "../components/Skeletons";
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 const ArrowForwardIcon = () => (
@@ -204,12 +205,22 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [isHomeLoading, setIsHomeLoading] = useState(true);
 
   const categories = useSelector((state) => state.categories?.categoriesData || []);
   const books = useSelector((state) => state.books?.booksData || []);
+  const isBookLoading = useSelector((state) => state.books?.isLoading);
   const { wishlistData } = useSelector((state) => state.wishlist);
   const { isLoggedIn } = useSelector((state) => state.auth);
   const { continueReadingData } = useSelector((state) => state.progress);
+
+  useEffect(() => {
+    setIsHomeLoading(true);
+    const timer = setTimeout(() => {
+      setIsHomeLoading(false);
+    }, 450);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     dispatch(getAllCategories());
@@ -285,6 +296,10 @@ export default function HomePage() {
       })
       : STATIC_BOOKS
   ).slice(0, 4);
+
+  if (isBookLoading || isHomeLoading || (books.length === 0 && categories.length === 0)) {
+    return <HomePageSkeleton />;
+  }
 
   return (
     <>

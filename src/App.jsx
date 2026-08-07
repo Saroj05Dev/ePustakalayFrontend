@@ -129,31 +129,20 @@ function App() {
            }
          />
 
-         <Route 
-         path="/carts"
-         element={
-          <PublicLayout><CartPage /></PublicLayout>
-         } 
-         />
-
         <Route 
-        path="/login" 
-        element={
-        <LoginPage />
-        }
-         />
-
-        <Route
+          path="/cart"
+          element={
+            <PublicLayout><CartPage /></PublicLayout>
+          } 
+        />
+        <Route 
           path="/carts"
           element={
-            <PublicLayout>
-              <CartPage />
-            </PublicLayout>
-          }
+            <PublicLayout><CartPage /></PublicLayout>
+          } 
         />
 
         <Route path="/login" element={<LoginPage />} />
-
         <Route path="/signup" element={<SignupPage />} />
 
         <Route
@@ -192,11 +181,9 @@ function App() {
         <Route
           path="/wishlist"
           element={
-            <ProtectedRoute allowedRoles={["user", "admin"]}>
-              <PublicLayout>
-                <WishlistPage />
-              </PublicLayout>
-            </ProtectedRoute>
+            <PublicLayout>
+              <WishlistPage />
+            </PublicLayout>
           }
         />
 

@@ -7,6 +7,7 @@ import {
   BookOpen,
   Heart,
   ReceiptText,
+  User,
 } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
@@ -21,13 +22,13 @@ export default function Navbar() {
   const { isLoggedIn } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart?.cartData || []);
   const cartCount = cartItems
-    .filter(item => item != null) // Filter out null/undefined items
+    .filter((item) => item != null)
     .reduce((acc, item) => acc + (item?.quantity || 1), 0);
 
   const wishlistItems = useSelector(
-    (state) => state.wishlist?.wishlistData || [],
+    (state) => state.wishlist?.wishlistData || []
   );
-  const wishlistCount = wishlistItems.filter(item => item != null).length;
+  const wishlistCount = wishlistItems.filter((item) => item != null).length;
 
   const [localSearch, setLocalSearch] = useState("");
   const [showMobileSearch, setShowMobileSearch] = useState(false);
@@ -55,107 +56,99 @@ export default function Navbar() {
   };
 
   const linkStyles = ({ isActive }) =>
-    `transition-all duration-200 relative pb-1 ${
+    `transition-all duration-200 relative pb-1 font-semibold ${
       isActive
-        ? "text-[#002629] after:w-full"
+        ? "text-[#002629] after:w-full font-bold"
         : "text-slate-500 hover:text-[#002629] after:w-0"
     } after:content-[""] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-[#002629] after:transition-all after:duration-200`;
 
-  // Mobile bottom nav items
-  const mobileNavItems = [
-    { to: "/", icon: Home, label: "Home" },
-    { to: "/books", icon: BookOpen, label: "Books" },
-    { to: "/wishlist", icon: Heart, label: "Wishlist", badge: wishlistCount },
-    { to: "/orders", icon: ReceiptText, label: "Orders" },
-  ];
-
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-slate-50/80 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-        <nav className="flex justify-between items-center px-4 md:px-8 py-4 max-w-350 mx-auto h-16">
-          {/* ── Left: Logo + Desktop Nav Links ── */}
-          <div className="flex items-center gap-6 md:gap-12">
-            <NavLink to="/" className="flex items-center">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-slate-50/90 backdrop-blur-md shadow-[0_4px_20px_rgb(0,0,0,0.04)] border-b border-slate-200/50">
+        <nav className="flex items-center justify-between px-4 sm:px-6 md:px-8 py-3 max-w-7xl mx-auto h-16 sm:h-20 gap-4">
+          {/* ── 1. Left: Logo Branding ── */}
+          <div className="flex items-center shrink-0">
+            <NavLink to="/" className="flex items-center group">
               <img
                 src={logo}
                 alt="ePustakalay Logo"
-                className="h-10 md:h-12 w-auto object-contain"
+                className="h-8 sm:h-10 md:h-11 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
               />
             </NavLink>
-
-            <div className="hidden lg:flex gap-6 lg:gap-8 items-center text-base">
-              <NavLink to="/" className={linkStyles}>
-                Home
-              </NavLink>
-              <NavLink to="/books" className={linkStyles}>
-                Books
-              </NavLink>
-
-              {/* My Orders — desktop */}
-              {isLoggedIn && (
-                <NavLink to="/orders" className={linkStyles}>
-                  My Orders
-                </NavLink>
-              )}
-
-              <NavLink to="/wishlist" className="relative">
-                {({ isActive }) => (
-                  <>
-                    <span className={linkStyles({ isActive })}>Wishlist</span>
-                    {wishlistCount > 0 && (
-                      <span
-                        className="absolute -top-2 -right-3 bg-[#002629] text-white rounded-full inline-flex items-center justify-center font-extrabold"
-                        style={{
-                          fontSize: "9px",
-                          minWidth: "16px",
-                          height: "16px",
-                          padding: "0 4px",
-                          lineHeight: 1,
-                          border: "1.5px solid white",
-                        }}
-                      >
-                        {wishlistCount}
-                      </span>
-                    )}
-                  </>
-                )}
-              </NavLink>
-            </div>
           </div>
 
-          {/* ── Right: Search + Cart + Auth ── */}
-          <div className="flex items-center gap-3 md:gap-6 py-5">
-            {/* Desktop Search */}
-            <div className="hidden lg:flex items-center bg-slate-200/50 rounded-lg px-3 py-2 w-48 lg:w-64">
-              <Search size={16} className="text-gray-400" />
+          {/* ── 2. Center: Navigation Links (Desktop & Tablet) ── */}
+          <div className="hidden md:flex flex-1 justify-center items-center gap-6 lg:gap-10 text-sm md:text-base font-semibold">
+            <NavLink to="/" className={linkStyles}>
+              Home
+            </NavLink>
+            <NavLink to="/books" className={linkStyles}>
+              Books
+            </NavLink>
+
+            {isLoggedIn && (
+              <NavLink to="/orders" className={linkStyles}>
+                My Orders
+              </NavLink>
+            )}
+
+            <NavLink to="/wishlist" className="relative group">
+              {({ isActive }) => (
+                <>
+                  <span className={linkStyles({ isActive })}>Wishlist</span>
+                  {wishlistCount > 0 && (
+                    <span
+                      className="absolute -top-2 -right-3.5 bg-[#002629] text-white rounded-full inline-flex items-center justify-center font-extrabold shadow-sm"
+                      style={{
+                        fontSize: "9px",
+                        minWidth: "16px",
+                        height: "16px",
+                        padding: "0 4px",
+                        lineHeight: 1,
+                        border: "1.5px solid white",
+                      }}
+                    >
+                      {wishlistCount}
+                    </span>
+                  )}
+                </>
+              )}
+            </NavLink>
+          </div>
+
+          {/* ── 3. Right: Search + Cart + Auth ── */}
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+            {/* Desktop Search Bar */}
+            <div className="hidden lg:flex items-center bg-slate-200/60 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#002629]/20 transition-all rounded-full px-3.5 py-1.5 w-44 xl:w-60 border border-slate-200/80">
+              <Search size={16} className="text-slate-400 shrink-0" />
               <input
                 type="text"
-                placeholder="Search the collection..."
+                placeholder="Search books..."
                 value={localSearch}
                 onChange={handleSearchChange}
-                className="bg-transparent outline-none ml-2 text-sm w-full"
+                className="bg-transparent outline-none ml-2 text-xs md:text-sm w-full text-slate-800 placeholder:text-slate-400"
               />
             </div>
 
-            {/* Mobile Search Icon */}
+            {/* Mobile / Small Tablet Search Icon */}
             <button
               onClick={() => setShowMobileSearch(true)}
-              className="lg:hidden p-2 hover:bg-slate-200 rounded-lg transition-colors"
+              className="lg:hidden p-2 hover:bg-slate-200/70 rounded-full transition-colors text-slate-700 active:scale-95 cursor-pointer"
               aria-label="Search"
             >
-              <Search size={20} className="text-slate-600" />
+              <Search size={19} />
             </button>
 
             {/* Cart Icon */}
             <NavLink
               to="/carts"
               aria-label="View shopping cart"
-              className="relative p-2 hover:bg-slate-200 rounded-lg transition-colors"
+              className="relative p-2 hover:bg-slate-200/70 rounded-full transition-colors text-slate-700 active:scale-95"
             >
-              <ShoppingCart size={20} className="text-slate-600" />
+              <ShoppingCart size={20} />
               {cartCount > 0 && (
                 <span
-                  className="absolute -top-1 -right-1 bg-[#002629] text-white rounded-full flex items-center justify-center font-extrabold"
+                  className="absolute -top-0.5 -right-0.5 bg-[#002629] text-white rounded-full flex items-center justify-center font-extrabold shadow-sm"
                   style={{
                     fontSize: "9px",
                     minWidth: "16px",
@@ -170,17 +163,18 @@ export default function Navbar() {
               )}
             </NavLink>
 
+            {/* User Auth Buttons */}
             {isLoggedIn ? (
-              <div className="hidden lg:flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <NavLink
                   to="/my-account"
-                  className="px-4 py-2 border rounded-md text-[#002629] border-[#002629] hover:bg-slate-100 font-semibold transition-all duration-200"
+                  className="hidden sm:inline-flex px-3.5 py-1.5 border border-[#002629] text-[#002629] hover:bg-[#002629] hover:text-white rounded-full font-semibold text-xs md:text-sm transition-all duration-200 shadow-xs"
                 >
                   My Account
                 </NavLink>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 bg-[#002629] text-white rounded-md font-semibold transition-all duration-200"
+                  className="px-3.5 py-1.5 bg-[#002629] text-white rounded-full font-semibold text-xs md:text-sm hover:bg-[#083d41] transition-all duration-200 shadow-xs cursor-pointer"
                 >
                   Logout
                 </button>
@@ -188,7 +182,7 @@ export default function Navbar() {
             ) : (
               <NavLink
                 to="/login"
-                className="px-4 py-2 border rounded-md font-semibold text-[#002629] border-[#002629] hover:bg-slate-100 transition-all duration-200"
+                className="px-4 py-1.5 border border-[#002629] rounded-full font-semibold text-xs md:text-sm text-[#002629] hover:bg-[#002629] hover:text-white transition-all duration-200 shadow-xs"
               >
                 Login
               </NavLink>
@@ -232,7 +226,7 @@ export default function Navbar() {
       )}
 
       {/* ── Mobile Bottom Nav ── */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white/90 backdrop-blur-xl border-t border-slate-100 shadow-[0_-4px_20px_0_rgba(0,0,0,0.05)]">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/90 backdrop-blur-xl border-t border-slate-200/80 shadow-[0_-4px_20px_0_rgba(0,0,0,0.06)]">
         <div className="flex justify-around items-center px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
           {/* Home */}
           <NavLink
@@ -241,15 +235,15 @@ export default function Navbar() {
             className={({ isActive }) =>
               `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 active:scale-90 ${
                 isActive
-                  ? "text-[#002629] bg-[#002629]/[0.06]"
-                  : "text-slate-400 hover:text-[#002629]"
+                  ? "text-[#002629] bg-[#002629]/[0.08]"
+                  : "text-slate-500 hover:text-[#002629]"
               }`
             }
           >
             {({ isActive }) => (
               <>
-                <Home size={22} strokeWidth={isActive ? 2.2 : 1.7} />
-                <span className="text-[10px] font-semibold uppercase tracking-wider">
+                <Home size={20} strokeWidth={isActive ? 2.3 : 1.7} />
+                <span className="text-[10px] font-bold tracking-wider">
                   Home
                 </span>
               </>
@@ -262,15 +256,15 @@ export default function Navbar() {
             className={({ isActive }) =>
               `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 active:scale-90 ${
                 isActive
-                  ? "text-[#002629] bg-[#002629]/[0.06]"
-                  : "text-slate-400 hover:text-[#002629]"
+                  ? "text-[#002629] bg-[#002629]/[0.08]"
+                  : "text-slate-500 hover:text-[#002629]"
               }`
             }
           >
             {({ isActive }) => (
               <>
-                <BookOpen size={22} strokeWidth={isActive ? 2.2 : 1.7} />
-                <span className="text-[10px] font-semibold uppercase tracking-wider">
+                <BookOpen size={20} strokeWidth={isActive ? 2.3 : 1.7} />
+                <span className="text-[10px] font-bold tracking-wider">
                   Books
                 </span>
               </>
@@ -283,15 +277,15 @@ export default function Navbar() {
             className={({ isActive }) =>
               `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 active:scale-90 relative ${
                 isActive
-                  ? "text-[#002629] bg-[#002629]/[0.06]"
-                  : "text-slate-400 hover:text-[#002629]"
+                  ? "text-[#002629] bg-[#002629]/[0.08]"
+                  : "text-slate-500 hover:text-[#002629]"
               }`
             }
           >
             {({ isActive }) => (
               <>
                 <div className="relative">
-                  <Heart size={22} strokeWidth={isActive ? 2.2 : 1.7} />
+                  <Heart size={20} strokeWidth={isActive ? 2.3 : 1.7} />
                   {wishlistCount > 0 && (
                     <span
                       className="absolute -top-1.5 -right-1.5 bg-[#002629] text-white rounded-full inline-flex items-center justify-center font-extrabold"
@@ -308,30 +302,53 @@ export default function Navbar() {
                     </span>
                   )}
                 </div>
-                <span className="text-[10px] font-semibold uppercase tracking-wider">
+                <span className="text-[10px] font-bold tracking-wider">
                   Wishlist
                 </span>
               </>
             )}
           </NavLink>
 
-          {/* Orders ← replaces Logout */}
+          {/* Orders */}
           {isLoggedIn && (
             <NavLink
               to="/orders"
               className={({ isActive }) =>
                 `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 active:scale-90 ${
                   isActive
-                    ? "text-[#002629] bg-[#002629]/[0.06]"
-                    : "text-slate-400 hover:text-[#002629]"
+                    ? "text-[#002629] bg-[#002629]/[0.08]"
+                    : "text-slate-500 hover:text-[#002629]"
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <ReceiptText size={22} strokeWidth={isActive ? 2.2 : 1.7} />
-                  <span className="text-[10px] font-semibold uppercase tracking-wider">
+                  <ReceiptText size={20} strokeWidth={isActive ? 2.3 : 1.7} />
+                  <span className="text-[10px] font-bold tracking-wider">
                     Orders
+                  </span>
+                </>
+              )}
+            </NavLink>
+          )}
+
+          {/* My Account */}
+          {isLoggedIn && (
+            <NavLink
+              to="/my-account"
+              className={({ isActive }) =>
+                `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 active:scale-90 ${
+                  isActive
+                    ? "text-[#002629] bg-[#002629]/[0.08]"
+                    : "text-slate-500 hover:text-[#002629]"
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <User size={20} strokeWidth={isActive ? 2.3 : 1.7} />
+                  <span className="text-[10px] font-bold tracking-wider">
+                    Account
                   </span>
                 </>
               )}
@@ -341,7 +358,7 @@ export default function Navbar() {
       </nav>
 
       {/* Bottom nav spacer so page content isn't hidden behind it on mobile */}
-      <div className="h-16 lg:hidden" aria-hidden="true" />
+      <div className="h-16 md:hidden" aria-hidden="true" />
 
       <style>{`
         @keyframes slideDown {
