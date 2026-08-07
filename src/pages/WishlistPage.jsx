@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { getAllWishlist, deleteWishlistItem, updateWishlistStatus } from '../redux/slices/wishlistSlice';
 import { addToCart, addToGuestCart, getCart } from '../redux/slices/cartSlice';
 import { toast } from 'react-hot-toast';
+import { WishlistSkeleton, PremiumEmptyState } from '../components/Skeletons';
 
 export default function WishlistContent() {
   const navigate = useNavigate();
@@ -19,8 +20,10 @@ export default function WishlistContent() {
   const [addingToCart, setAddingToCart] = useState({});
 
   useEffect(() => {
-    dispatch(getAllWishlist());
-    if (isLoggedIn) dispatch(getCart());
+    if (isLoggedIn) {
+      dispatch(getAllWishlist());
+      dispatch(getCart());
+    }
   }, [dispatch, isLoggedIn]);
 
   // ── Search filter ────────────────────────────────────────────────────────
@@ -105,14 +108,7 @@ export default function WishlistContent() {
 
   // ── Loading ──────────────────────────────────────────────────────────────
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#002629] border-r-transparent" />
-          <p className="mt-4 text-[#404849] font-medium">Loading your wishlist...</p>
-        </div>
-      </div>
-    );
+    return <WishlistSkeleton />;
   }
 
   // ── Render ───────────────────────────────────────────────────────────────
@@ -143,37 +139,21 @@ export default function WishlistContent() {
 
       {/* Empty state */}
       {wishlistData.length === 0 ? (
-        <div className="text-center py-12 md:py-20">
-          <div className="mb-4 md:mb-6">
-            <span className="material-symbols-outlined text-[60px] md:text-[80px] text-[#c0c8c9]">book</span>
-          </div>
-          <h2 className="text-xl md:text-2xl font-bold text-[#002629] mb-2 md:mb-3 font-['Manrope']">
-            Your wishlist is empty
-          </h2>
-          <p className="text-[#404849] mb-6 md:mb-8 max-w-md mx-auto text-sm md:text-base px-4">
-            Start adding books you'd like to read. Browse our collection to discover your next favourite.
-          </p>
-          <a
-            href="/books"
-            className="inline-block px-6 md:px-8 py-2.5 md:py-3 bg-gradient-to-r from-[#002629] to-[#083d41] text-white rounded-lg font-semibold hover:opacity-95 transition-opacity no-underline text-sm md:text-base"
-          >
-            Browse Books
-          </a>
-        </div>
-
+        <PremiumEmptyState
+          title="Your wishlist is empty."
+          subtitle="Start exploring books."
+          icon="bookmark_add"
+          actionText="Start exploring books"
+          actionLink="/books"
+        />
       ) : filteredWishlist.length === 0 ? (
-        <div className="text-center py-12 md:py-20">
-          <div className="mb-4 md:mb-6">
-            <span className="material-symbols-outlined text-[60px] md:text-[80px] text-[#c0c8c9]">search_off</span>
-          </div>
-          <h2 className="text-xl md:text-2xl font-bold text-[#002629] mb-2 md:mb-3 font-['Manrope']">
-            No matching books found
-          </h2>
-          <p className="text-[#404849] mb-6 md:mb-8 max-w-md mx-auto text-sm md:text-base px-4">
-            We couldn't find any books matching "{searchQuery}".
-          </p>
-        </div>
-
+        <PremiumEmptyState
+          title="No matching books found"
+          subtitle={`We couldn't find any books matching "${searchQuery}".`}
+          icon="search_off"
+          actionText="Clear Search"
+          actionLink="/wishlist"
+        />
       ) : (
         <>
           {/* Wishlist Grid */}

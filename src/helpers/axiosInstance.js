@@ -13,6 +13,8 @@ const PUBLIC_ENDPOINTS = [
   "/books",
   "/ratings",
   "/categories",
+  "/wishlist",
+  "/cart",
 ];
 
 const isPublicEndpoint = (url = "") =>

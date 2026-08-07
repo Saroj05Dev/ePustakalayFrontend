@@ -6,6 +6,7 @@ import { toggleWishlist, getAllWishlist } from "../redux/slices/wishlistSlice";
 import { getCart, addToCart, addToGuestCart } from "../redux/slices/cartSlice";
 import { toast } from "react-hot-toast";
 import { createRating, getAllRating, updateRating, deleteRating, clearRatings } from "../redux/slices/ratingSlice";
+import { BookDetailSkeleton, PremiumEmptyState } from "../components/Skeletons";
 
 const colors = {
   primary: "#002629",
@@ -170,6 +171,16 @@ export default function BookdetailPage() {
 
   const book = books.find((b) => b._id === id);
 
+  const [isDetailLoading, setIsDetailLoading] = useState(true);
+
+  useEffect(() => {
+    setIsDetailLoading(true);
+    const timer = setTimeout(() => {
+      setIsDetailLoading(false);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [id]);
+
   // Fetch books if not already loaded
   // Load books once
   useEffect(() => {
@@ -272,32 +283,22 @@ export default function BookdetailPage() {
   };
 
 
-  // Show loading state
-  if (isLoading || (!book && books.length === 0)) {
-    return (
-      <div style={{ background: colors.surface, minHeight: "100vh" }} className="flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-[#002629] border-r-transparent"></div>
-          <p className="mt-4 text-[#404849] font-medium">Loading book details...</p>
-        </div>
-      </div>
-    );
+  // Show YouTube-style skeleton loading state
+  if (isLoading || isDetailLoading || (!book && books.length === 0)) {
+    return <BookDetailSkeleton />;
   }
 
-  // Show error if book not found after loading
+  // Show premium empty state if book not found after loading
   if (!book) {
     return (
-      <div style={{ background: colors.surface, minHeight: "100vh" }} className="flex items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <h1 className="text-3xl font-bold text-[#002629] mb-4 font-['Manrope']">Book Not Found</h1>
-          <p className="text-[#404849] mb-6">Sorry, we couldn't find the book you're looking for.</p>
-          <a
-            href="/books"
-            className="inline-block px-6 py-3 bg-gradient-to-r from-[#002629] to-[#083d41] text-white rounded-lg font-semibold hover:opacity-95 transition-opacity no-underline"
-          >
-            Browse All Books
-          </a>
-        </div>
+      <div style={{ background: colors.surface, minHeight: "100vh" }} className="pt-24 pb-12">
+        <PremiumEmptyState
+          title="Book Not Found"
+          subtitle="Sorry, we couldn't find the book you're looking for."
+          icon="search_off"
+          actionText="Browse All Books"
+          actionLink="/books"
+        />
       </div>
     );
   }

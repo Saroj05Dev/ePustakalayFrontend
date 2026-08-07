@@ -5,3 +5,25 @@ body {
   margin: 0;
   font-family: Inter, sans-serif;
 }
+
+@keyframes youtubeShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.youtube-shimmer {
+  background: linear-gradient(
+    90deg,
+    #e5e8ee 0%,
+    #f4f6fa 25%,
+    #ffffff 50%,
+    #f4f6fa 75%,
+    #e5e8ee 100%
+  );
+  background-size: 200% 100%;
+  animation: youtubeShimmer 1.5s ease-in-out infinite;
+}

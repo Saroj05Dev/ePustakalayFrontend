@@ -6,10 +6,12 @@ import { getChaptersByBook, getChapterById } from "../redux/slices/chapterSlice"
 import { getAllBooks } from "../redux/slices/bookSlice";
 import {
   getNotesByBookAndChapter,
+  getAllNotes,
   createNote,
   deleteNote,
   clearNotes,
 } from "../redux/slices/notesSlice";
+import { exportBookNotes } from "../utils/exportNotes";
 import {
   getBookmarkByBook,
   getAllBookmarks,
@@ -125,6 +127,13 @@ const ExternalLinkIcon = ({ size = 14 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
     <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+  </svg>
+);
+const DownloadIcon = ({ size = 15 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
   </svg>
 );
 
@@ -662,6 +671,7 @@ function StudyGuidePanel({
   noteSelection,
   setNoteSelection,
   onRemoveHighlight,
+  onExportNotes,
 }) {
   const [text, setText] = useState("");
   const [adding, setAdding] = useState(false);
@@ -706,18 +716,45 @@ function StudyGuidePanel({
           }}>
             Study Guide
           </span>
-          {isMobile && (
-            <button
-              onClick={onClose}
-              style={{
-                background: "transparent", border: "none",
-                color: C.onVariant, cursor: "pointer",
-                padding: 4, borderRadius: 6,
-              }}
-            >
-              <CloseIcon size={16} />
-            </button>
-          )}
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {onExportNotes && notes && notes.length > 0 && (
+              <button
+                onClick={onExportNotes}
+                title="Export Notes to TXT file"
+                style={{
+                  background: C.accentLight,
+                  color: C.accent,
+                  border: `1.5px solid ${C.accent}40`,
+                  borderRadius: 6,
+                  padding: "3px 9px",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  fontFamily: "'Manrope',sans-serif",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = C.accent; e.currentTarget.style.color = "#fff"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = C.accentLight; e.currentTarget.style.color = C.accent; }}
+              >
+                <DownloadIcon size={12} /> Export Notes
+              </button>
+            )}
+            {isMobile && (
+              <button
+                onClick={onClose}
+                style={{
+                  background: "transparent", border: "none",
+                  color: C.onVariant, cursor: "pointer",
+                  padding: 4, borderRadius: 6,
+                }}
+              >
+                <CloseIcon size={16} />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Tabs */}
@@ -1631,6 +1668,34 @@ export default function Notes() {
     navigate(`/books/${bookId}/chapters/${chapterId}/notes`);
   };
 
+  const handleExportNotes = async () => {
+    let activeNotes = notes;
+    let activeHighlights = highlightsFromRedux;
+
+    try {
+      const res = await dispatch(getAllNotes()).unwrap();
+      const allFetched = res?.data?.data || res?.data || [];
+      if (Array.isArray(allFetched) && allFetched.length > 0) {
+        const bookNotes = allFetched.filter((n) => {
+          const noteBookId = n.book && typeof n.book === "object" ? n.book._id : n.book;
+          return noteBookId === id;
+        });
+        if (bookNotes.length > 0) {
+          activeNotes = bookNotes;
+        }
+      }
+    } catch (err) {
+      // fallback
+    }
+
+    exportBookNotes({
+      book,
+      chapters,
+      notes: activeNotes,
+      highlights: activeHighlights,
+    });
+  };
+
   const navigateChapter = (ch) => {
     navigate(`/books/${id}/chapters/${ch._id}/notes`);
   };
@@ -1789,6 +1854,33 @@ export default function Notes() {
             </span>
           </div>
         )}
+
+        {/* Export Notes Button */}
+        <button
+          onClick={handleExportNotes}
+          title="Export Notes to TXT file"
+          style={{
+            background: `linear-gradient(135deg, ${C.primary} 0%, ${C.primaryMid} 100%)`,
+            border: "none",
+            color: "#ffffff",
+            cursor: "pointer",
+            borderRadius: 8,
+            padding: "6px 12px",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            fontFamily: "'Manrope',sans-serif",
+            fontWeight: 700,
+            fontSize: 12,
+            boxShadow: "0 2px 8px rgba(0,38,41,0.2)",
+            transition: "all 0.2s",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.9"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
+        >
+          <DownloadIcon size={14} />
+          <span>Export</span>
+        </button>
 
         {/* Bookmark Toggle */}
         <button
@@ -2067,6 +2159,7 @@ export default function Notes() {
             setTab={setActiveTab}
             noteSelection={noteSelection}
             setNoteSelection={setNoteSelection}
+            onExportNotes={handleExportNotes}
           />
         </div>
       </div>
@@ -2113,6 +2206,7 @@ export default function Notes() {
             setTab={setActiveTab}
             noteSelection={noteSelection}
             setNoteSelection={setNoteSelection}
+            onExportNotes={handleExportNotes}
           />
         </div>
       </div>
