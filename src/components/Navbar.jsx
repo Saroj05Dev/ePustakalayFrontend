@@ -13,13 +13,17 @@ import { useSelector, useDispatch } from "react-redux";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { logout } from "../redux/slices/authSlice";
 import logo from "../assets/ePustakalayNewLogo.png";
+import { NavbarSkeleton } from "./Skeletons";
 
-export default function Navbar() {
+export default function Navbar({ showSkeleton = false }) {
+  if (showSkeleton) {
+    return <NavbarSkeleton />;
+  }
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { isLoggedIn } = useSelector((state) => state.auth);
+  const { isLoggedIn, isCheckingAuth } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart?.cartData || []);
   const cartCount = cartItems
     .filter((item) => item != null)
@@ -164,7 +168,9 @@ export default function Navbar() {
             </NavLink>
 
             {/* User Auth Buttons */}
-            {isLoggedIn ? (
+            {isCheckingAuth ? (
+              <div className="w-16 sm:w-20 h-8 rounded-full youtube-shimmer" />
+            ) : isLoggedIn ? (
               <div className="flex items-center gap-2">
                 <NavLink
                   to="/my-account"

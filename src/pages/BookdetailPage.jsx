@@ -284,7 +284,7 @@ export default function BookdetailPage() {
 
 
   // Show YouTube-style skeleton loading state
-  if (isLoading || isDetailLoading || (!book && books.length === 0)) {
+  if (isLoading || isDetailLoading) {
     return <BookDetailSkeleton />;
   }
 

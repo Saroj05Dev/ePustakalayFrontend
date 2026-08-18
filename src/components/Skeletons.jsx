@@ -351,3 +351,31 @@ export function PremiumEmptyState({
     </div>
   );
 }
+
+export function NavbarSkeleton() {
+  return (
+    <header className="fixed top-0 left-0 right-0 z-50 bg-slate-50/90 backdrop-blur-md shadow-[0_4px_20px_rgb(0,0,0,0.04)] border-b border-slate-200/50">
+      <nav className="flex items-center justify-between px-4 sm:px-6 md:px-8 py-3 max-w-7xl mx-auto h-16 sm:h-20 gap-4">
+        {/* 1. Left Logo Skeleton */}
+        <div className="flex items-center shrink-0">
+          <div className="w-28 sm:w-36 md:w-40 h-8 sm:h-10 rounded-lg youtube-shimmer" />
+        </div>
+
+        {/* 2. Center Links Skeleton */}
+        <div className="hidden md:flex flex-1 justify-center items-center gap-8 lg:gap-10">
+          <div className="w-14 h-5 rounded-md youtube-shimmer" />
+          <div className="w-14 h-5 rounded-md youtube-shimmer" />
+          <div className="w-16 h-5 rounded-md youtube-shimmer" />
+        </div>
+
+        {/* 3. Right Action Skeleton */}
+        <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+          <div className="hidden lg:block w-44 xl:w-60 h-9 rounded-full youtube-shimmer" />
+          <div className="w-9 h-9 rounded-full youtube-shimmer" />
+          <div className="w-20 sm:w-24 h-9 rounded-full youtube-shimmer" />
+        </div>
+      </nav>
+    </header>
+  );
+}
+
