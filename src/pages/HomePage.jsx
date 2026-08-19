@@ -297,7 +297,7 @@ export default function HomePage() {
       : STATIC_BOOKS
   ).slice(0, 4);
 
-  if (isBookLoading || isHomeLoading || (books.length === 0 && categories.length === 0)) {
+  if (isBookLoading || isHomeLoading) {
     return <HomePageSkeleton />;
   }
 
